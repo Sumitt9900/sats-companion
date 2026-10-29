@@ -13,14 +13,22 @@ from core.config import settings
 
 
 # ---------------------------------------------------------------------------
-# Engine
+# Engine (Supports both PostgreSQL and SQLite for offline / standalone use)
 # ---------------------------------------------------------------------------
+connect_args = {}
+engine_kwargs = {"echo": (settings.ENVIRONMENT == "development")}
+
+if settings.DATABASE_URL.startswith("sqlite"):
+    connect_args["check_same_thread"] = False
+else:
+    engine_kwargs["pool_pre_ping"] = True
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
+
 engine = create_engine(
     settings.DATABASE_URL,
-    pool_pre_ping=True,          # Detect stale connections before use
-    pool_size=10,                # Default connection pool size
-    max_overflow=20,             # Extra connections allowed under load
-    echo=(settings.ENVIRONMENT == "development"),  # SQL logging in dev
+    connect_args=connect_args,
+    **engine_kwargs,
 )
 
 

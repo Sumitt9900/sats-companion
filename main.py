@@ -19,7 +19,9 @@ ReDoc:       http://localhost:8000/redoc
 """
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+import os
 
 from core.config import settings
 from core.databsae import engine, Base
@@ -98,16 +100,24 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(v1_router, prefix="/api/v1")
 
 # ---------------------------------------------------------------------------
+# Static files for Offline-First PWA Client
+# ---------------------------------------------------------------------------
+_static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.isdir(_static_dir):
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
+
+# ---------------------------------------------------------------------------
 # Health / root endpoints
 # ---------------------------------------------------------------------------
 
-@app.get("/", tags=["Health"], summary="Root health check")
+@app.get("/", tags=["Health"], summary="Root web entry")
 def root():
     """
-    Basic health check endpoint.
-
-    Returns the service status and version — useful for load balancer probes.
+    Root endpoint: redirects browser to the offline-capable PWA client,
+    or returns service status if static assets are not mounted.
     """
+    if os.path.isdir(_static_dir):
+        return RedirectResponse(url="/static/index.html")
     return {
         "status": "success",
         "message": "SATS Companion Middleware is online",

@@ -82,3 +82,4 @@ uvicorn main:app --reload --port 8000
 1. **Local Mutation**: Actions (e.g. marking attendance) are committed locally.
 2. **Sync Queue**: Mutations are saved to `sync_queue` with deterministic `SHA-256` checksums.
 3. **Synchronization**: When internet connectivity is available, the client triggers `POST /api/v1/sync/push` to push local batches and resolve conflicts.
+

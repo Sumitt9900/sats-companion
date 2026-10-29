@@ -90,6 +90,27 @@ class Designation(str, enum.Enum):
     OTHER = "other"
 
 
+class UserRole(str, enum.Enum):
+    ADMIN = "admin"
+    HEADMASTER = "headmaster"
+    TEACHER = "teacher"
+    DATA_ENTRY = "data_entry"
+
+
+class SyncOperation(str, enum.Enum):
+    CREATE = "create"
+    UPDATE = "update"
+    DELETE = "delete"
+
+
+class SyncStatus(str, enum.Enum):
+    PENDING = "pending"
+    SYNCED = "synced"
+    CONFLICT = "conflict"
+    ERROR = "error"
+    SKIPPED = "skipped"
+
+
 # ---------------------------------------------------------------------------
 # School
 # ---------------------------------------------------------------------------
@@ -147,6 +168,7 @@ class Teacher(Base):
     hashed_password = Column(String(200), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
+    role = Column(Enum(UserRole), nullable=False, default=UserRole.TEACHER)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -294,3 +316,56 @@ class TransferCertificate(Base):
     issuing_school = relationship("School", foreign_keys=[issuing_school_dise])
     requested_by = relationship("Teacher", foreign_keys=[requested_by_teacher_id])
     approved_by = relationship("Teacher", foreign_keys=[approved_by_teacher_id])
+
+
+# ---------------------------------------------------------------------------
+# SyncQueue — persists every local mutation for offline-first sync
+# ---------------------------------------------------------------------------
+class SyncQueue(Base):
+    """
+    Offline-first sync queue. Every mutation to any entity is recorded here
+    before (or instead of) being applied to the central database.
+
+    When connectivity is restored, the sync engine flushes this queue to the
+    central SATS gateway, using cryptographic checksums to verify integrity.
+    """
+    __tablename__ = "sync_queue"
+
+    id = Column(String(36), primary_key=True, default=_uuid)
+    operation = Column(Enum(SyncOperation), nullable=False)
+    entity_type = Column(String(50), nullable=False, index=True)  # e.g. "student", "attendance"
+    entity_id = Column(String(50), nullable=False, index=True)
+    payload_json = Column(Text, nullable=False)                    # JSON-serialised entity data
+    checksum_sha256 = Column(String(64), nullable=False)           # SHA-256 of payload_json
+    sync_status = Column(Enum(SyncStatus), nullable=False, default=SyncStatus.PENDING, index=True)
+    conflict_data = Column(Text, nullable=True)                    # Server version on conflict
+    error_message = Column(Text, nullable=True)
+    retry_count = Column(Integer, default=0, nullable=False)
+    local_device_id = Column(String(100), nullable=True)           # Which device created this
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    synced_at = Column(DateTime, nullable=True)
+
+
+# ---------------------------------------------------------------------------
+# SyncLog — audit trail of synchronisation events
+# ---------------------------------------------------------------------------
+class SyncLog(Base):
+    """
+    Audit log for each sync session. Tracks how many records were pushed,
+    pulled, conflicted, and any error messages.
+    """
+    __tablename__ = "sync_logs"
+
+    id = Column(String(36), primary_key=True, default=_uuid)
+    session_id = Column(String(36), nullable=False, unique=True)   # UUID per sync session
+    triggered_by_teacher_id = Column(String(36), ForeignKey("teachers.id"), nullable=True)
+    pushed_count = Column(Integer, default=0, nullable=False)
+    pulled_count = Column(Integer, default=0, nullable=False)
+    conflict_count = Column(Integer, default=0, nullable=False)
+    error_count = Column(Integer, default=0, nullable=False)
+    sync_mode = Column(String(20), nullable=False, default="manual")  # "manual" | "auto"
+    duration_seconds = Column(Float, nullable=True)
+    error_details = Column(Text, nullable=True)
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+    success = Column(Boolean, default=False, nullable=False)

@@ -14,6 +14,7 @@ from api.v1.assessments import router as assessments_router
 from api.v1.tc import router as tc_router
 from api.v1.ai_insights import router as ai_router
 from api.v1.sync import router as sync_router
+from api.v1.import_csv import router as import_router
 
 # Main v1 router — all sub-routers are mounted here
 v1_router = APIRouter()
@@ -27,3 +28,4 @@ v1_router.include_router(assessments_router)
 v1_router.include_router(tc_router)
 v1_router.include_router(ai_router)
 v1_router.include_router(sync_router)
+v1_router.include_router(import_router)

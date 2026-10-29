@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#1a237e" />
+  <title>SATS Companion | Karnataka Schools Micro-ERP</title>
+  <link rel="manifest" href="/static/manifest.json" />
+  <style>
+    :root {
+      --primary: #1a237e;
+      --primary-light: #3949ab;
+      --primary-dark: #0d1566;
+      --success: #2e7d32;
+      --warning: #e65100;
+      --danger: #c62828;
+      --surface: #ffffff;
+      --surface-2: #f4f6f8;
+      --text: #212121;
+      --text-muted: #666666;
+      --border: #e0e0e0;
+      --radius: 8px;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--surface-2); color: var(--text); min-height: 100vh; }
+
+    /* Layout */
+    .app-layout { display: grid; grid-template-rows: 60px 1fr; min-height: 100vh; }
+    .main-content { display: flex; }
+    .sidebar { width: 230px; background: var(--primary); color: #fff; padding: 16px 0; flex-shrink: 0; }
+    .content-area { flex: 1; padding: 24px; overflow-y: auto; }
+
+    /* Header */
+    .header { background: var(--primary); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-shadow: 0 2px 6px rgba(0,0,0,0.25); z-index: 10; }
+    .header-logo { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+
+    /* Sync Badge */
+    .sync-badge { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); color: white; }
+    .sync-badge.synced { background: #2e7d32; border-color: #4caf50; }
+    .sync-badge.pending { background: #e65100; border-color: #ff9800; }
+    .sync-badge.offline { background: #c62828; border-color: #ef5350; }
+
+    /* Nav */
+    .nav-label { padding: 8px 20px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 12px 20px; cursor: pointer; font-size: 14px; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(255,255,255,0.22); font-weight: 600; border-left: 4px solid #fff; }
+
+    /* Pages */
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-header { margin-bottom: 20px; }
+    .page-header h1 { font-size: 24px; color: var(--primary); }
+    .page-header p { color: var(--text-muted); font-size: 14px; }
+
+    /* Login */
+    #page-login { display: none; min-height: 100vh; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); }
+    #page-login.active { display: flex; position: fixed; inset: 0; z-index: 100; }
+    .login-card { background: white; border-radius: 12px; padding: 36px; width: 100%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .login-logo { text-align: center; margin-bottom: 24px; }
+
+    /* Cards & Stats */
+    .stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); text-align: center; }
+    .stat-icon { font-size: 28px; margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 700; color: var(--primary); }
+    .stat-value--small { font-size: 14px; }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    .card { background: var(--surface); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; }
+    .card h3 { font-size: 16px; margin-bottom: 12px; color: var(--primary); }
+
+    /* Table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 14px; background: white; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+    .data-table th { background: var(--primary); color: white; padding: 10px 14px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .data-table tr:hover td { background: var(--surface-2); }
+
+    /* Badges */
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-active { background: #e8f5e9; color: #1b5e20; }
+    .badge-inactive { background: #ffebee; color: #b71c1c; }
+    .badge-general { background: #e3f2fd; color: #0d47a1; }
+    .badge-obc { background: #f3e5f5; color: #4a148c; }
+    .badge-sc, .badge-st { background: #fff8e1; color: #f57f17; }
+
+    /* Buttons & Forms */
+    .btn { padding: 9px 18px; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+    .form-group input, .form-group select { width: 100%; padding: 9px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; }
+
+    /* Toast */
+    #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+    .toast { padding: 12px 18px; border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; color: white; opacity: 0; transform: translateY(10px); transition: 0.3s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast-success { background: var(--success); }
+    .toast-warning { background: var(--warning); }
+    .toast-error { background: var(--danger); }
+    .toast-info { background: var(--primary); }
+
+    .import-result { padding: 14px; border-radius: var(--radius); margin-top: 14px; }
+    .import-result--success { background: #e8f5e9; border: 1px solid #a5d6a7; }
+    .import-result--warning { background: #fff8e1; border: 1px solid #ffe082; }
+  </style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="page-login" class="page">
+  <div class="login-card">
+    <div class="login-logo">
+      <div style="font-size: 42px;">🏫</div>
+      <h2 style="color:var(--primary); margin-top:8px;">SATS Companion</h2>
+      <p style="color:var(--text-muted); font-size:13px;">Karnataka Micro-ERP Middleware</p>
+    </div>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="kgid">KGID / Employee ID</label>
+        <input type="text" id="kgid" placeholder="e.g. KGID10294" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" required />
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; margin-top:6px;">Sign In →</button>
+    </form>
+    <p style="text-align:center; font-size:11px; color:#888; margin-top:16px;">
+      🔒 Offline-first synchronization · SHA-256 integrity verified
+    </p>
+  </div>
+</div>
+
+<!-- Main App Shell -->
+<div id="app-layout" class="app-layout" style="display:none">
+  <header class="header">
+    <div class="header-logo">
+      🏫 <span>SATS Companion</span>
+      <span style="font-size:11px; opacity:0.8; font-weight:normal; margin-left:8px;">Department of School Education, Karnataka</span>
+    </div>
+    <div class="header-right">
+      <span id="sync-badge" class="sync-badge" onclick="syncNow()" title="Click to synchronize now">
+        ⚪ Checking...
+      </span>
+      <button class="btn btn-sm btn-secondary" style="color:white; background:rgba(255,255,255,0.15);" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <nav class="sidebar">
+      <div class="nav-label">Core Operations</div>
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" data-page="students" onclick="showPage('students')">👥 Students</div>
+      <div class="nav-item" data-page="attendance" onclick="showPage('attendance')">📋 Attendance</div>
+
+      <div class="nav-label" style="margin-top:14px;">Data & Sync</div>
+      <div class="nav-item" data-page="import" onclick="showPage('import')">📤 CSV Import</div>
+      <div class="nav-item" data-page="sync" onclick="showPage('sync')">🔄 Sync Audit</div>
+
+      <div class="nav-label" style="margin-top:14px;">Documentation</div>
+      <div class="nav-item" onclick="window.open('/docs', '_blank')">📖 API Docs (Swagger)</div>
+    </nav>
+
+    <main class="content-area">
+      <!-- Dashboard -->
+      <div id="page-dashboard" class="page">
+        <div class="page-header">
+          <h1>📊 School Dashboard</h1>
+          <p>Real-time micro-ERP metrics and synchronization status</p>
+        </div>
+        <div id="dashboard-stats"><p>Loading metrics...</p></div>
+      </div>
+
+      <!-- Students -->
+      <div id="page-students" class="page">
+        <div class="page-header">
+          <h1>👥 Student Roster</h1>
+          <p>Browse, search, and track student profiles</p>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <input type="text" id="student-search-input" placeholder="Search by student name..." style="padding:8px 12px; border:1px solid var(--border); border-radius:6px; flex:1;" />
+          <button class="btn btn-primary" onclick="loadStudents(document.getElementById('student-search-input').value)">🔍 Search</button>
+        </div>
+        <div id="student-list"><p>Loading student directory...</p></div>
+      </div>
+
+      <!-- Attendance -->
+      <div id="page-attendance" class="page">
+        <div class="page-header">
+          <h1>📋 Daily Attendance</h1>
+          <p>Mark and save daily student attendance offline or online</p>
+        </div>
+        <div class="card">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <label style="font-weight:600; font-size:14px;">Attendance Date:</label>
+            <input type="date" id="attendance-date" style="padding:6px 12px; border:1px solid var(--border); border-radius:6px;" />
+            <button class="btn btn-secondary" onclick="loadAttendanceForm()">Refresh List</button>
+          </div>
+        </div>
+        <div id="attendance-form"></div>
+      </div>
+
+      <!-- CSV Import -->
+      <div id="page-import" class="page">
+        <div class="page-header">
+          <h1>📤 CSV Bulk Import</h1>
+          <p>Upload student rosters or attendance files exported from school databases</p>
+        </div>
+        <div class="card">
+          <h3>👥 Import Students</h3>
+          <div class="form-group">
+            <input type="file" id="students-csv-input" accept=".csv" />
+          </div>
+          <div style="margin-bottom:12px;">
+            <label><input type="checkbox" id="students-dry-run" /> Validate only (Dry run)</label>
+          </div>
+          <button class="btn btn-primary" onclick="handleCsvImport('students')">📤 Upload Students CSV</button>
+          <a href="/api/v1/import/templates/student" style="margin-left:14px; font-size:13px; color:var(--primary);" download>⬇️ Download Student Sample CSV</a>
+          <div id="students-import-result"></div>
+        </div>
+
+        <div class="card">
+          <h3>📋 Import Daily Attendance</h3>
+          <div class="form-group">
+            <input type="file" id="attendance-csv-input" accept=".csv" />
+          </div>
+          <div style="margin-bottom:12px;">
+            <label><input type="checkbox" id="attendance-dry-run" /> Validate only (Dry run)</label>
+          </div>
+          <button class="btn btn-primary" onclick="handleCsvImport('attendance')">📤 Upload Attendance CSV</button>
+          <a href="/api/v1/import/templates/attendance" style="margin-left:14px; font-size:13px; color:var(--primary);" download>⬇️ Download Attendance Sample CSV</a>
+          <div id="attendance-import-result"></div>
+        </div>
+      </div>
+
+      <!-- Sync History -->
+      <div id="page-sync" class="page">
+        <div class="page-header">
+          <h1>🔄 Synchronization Audit Log</h1>
+          <p>History of offline mutations pushed to central SATS gateway</p>
+        </div>
+        <div style="margin-bottom:14px;">
+          <button class="btn btn-primary" onclick="syncNow()">🔄 Trigger Sync Now</button>
+          <button class="btn btn-secondary" onclick="loadSyncHistory()">Refresh History</button>
+        </div>
+        <div id="sync-history"><p>Loading sync audit history...</p></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
