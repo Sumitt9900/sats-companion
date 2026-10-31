@@ -738,36 +738,36 @@
     <!-- Sidebar Navigation -->
     <aside class="sidebar">
       <div class="sidebar-heading" data-i18n="nav_core">ಮುಖ್ಯ ಕಾರ್ಯಗಳು (Core Modules)</div>
-      <a class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+      <div class="nav-item active" role="button" tabindex="0" data-page="dashboard" onclick="showPage('dashboard', event)">
         <span class="nav-icon">📊</span>
         <span data-i18n="nav_dashboard">ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ (Dashboard)</span>
-      </a>
-      <a class="nav-item" data-page="students" onclick="showPage('students')">
+      </div>
+      <div class="nav-item" role="button" tabindex="0" data-page="students" onclick="showPage('students', event)">
         <span class="nav-icon">👥</span>
         <span data-i18n="nav_students">ವಿದ್ಯಾರ್ಥಿಗಳ ಪಟ್ಟಿ (Students)</span>
-      </a>
-      <a class="nav-item" data-page="attendance" onclick="showPage('attendance')">
+      </div>
+      <div class="nav-item" role="button" tabindex="0" data-page="attendance" onclick="showPage('attendance', event)">
         <span class="nav-icon">📋</span>
         <span data-i18n="nav_attendance">ದಿನನಿತ್ಯದ ಹಾಜರಾತಿ (Attendance)</span>
-      </a>
-      <a class="nav-item" data-page="assessments" onclick="showPage('assessments')">
+      </div>
+      <div class="nav-item" role="button" tabindex="0" data-page="assessments" onclick="showPage('assessments', event)">
         <span class="nav-icon">📝</span>
         <span data-i18n="nav_assessments">ಮೌಲ್ಯಮಾಪನ / ಅಂಕಗಳು (CCE)</span>
-      </a>
-      <a class="nav-item" data-page="tc" onclick="showPage('tc')">
+      </div>
+      <div class="nav-item" role="button" tabindex="0" data-page="tc" onclick="showPage('tc', event)">
         <span class="nav-icon">📜</span>
         <span data-i18n="nav_tc">ವರ್ಗಾವಣೆ ಪತ್ರ (TC Workflow)</span>
-      </a>
+      </div>
 
       <div class="sidebar-heading" style="margin-top:14px;" data-i18n="nav_data">ಮಾಹಿತಿ ಮತ್ತು ಸಿಂಕ್ (Data & Sync)</div>
-      <a class="nav-item" data-page="import" onclick="showPage('import')">
+      <div class="nav-item" role="button" tabindex="0" data-page="import" onclick="showPage('import', event)">
         <span class="nav-icon">📤</span>
         <span data-i18n="nav_import">ಸಿಎಸ್‌ವಿ ಆಮದು (CSV Import)</span>
-      </a>
-      <a class="nav-item" data-page="sync" onclick="showPage('sync')">
+      </div>
+      <div class="nav-item" role="button" tabindex="0" data-page="sync" onclick="showPage('sync', event)">
         <span class="nav-icon">🔄</span>
         <span data-i18n="nav_sync">ಸಿಂಕ್ ಇತಿಹಾಸ (Sync Audit)</span>
-      </a>
+      </div>
 
       <div class="sidebar-footer">
         <div><strong>SATS Companion v1.0</strong></div>
@@ -1229,6 +1229,6 @@
 
 <div id="toast-container"></div>
 
-<script src="/static/app.js"></script>
+<script src="/static/app.js?v=2.1.0"></script>
 </body>
 </html>

@@ -18,7 +18,15 @@ const LANG_KEY = "sats_lang";
 const FONT_SCALE_KEY = "sats_font_scale";
 const SYNC_INTERVAL_MS = 20000;
 
-let authToken = localStorage.getItem(TOKEN_KEY) || null;
+function getStoredToken() {
+  const raw = localStorage.getItem(TOKEN_KEY);
+  if (!raw || raw === "undefined" || raw === "null" || raw.length < 20) {
+    return null;
+  }
+  return raw;
+}
+
+let authToken = getStoredToken();
 let currentTeacher = JSON.parse(localStorage.getItem(TEACHER_KEY) || "null");
 let currentLang = localStorage.getItem(LANG_KEY) || "kn";
 let isOnline = navigator.onLine;
@@ -361,6 +369,7 @@ function toast(message, type = "info") {
 // ── API & Offline Mutation Layer ──────────────────────────────────────────────
 async function apiCall(method, path, body = null, isFormData = false) {
   const headers = {};
+  authToken = getStoredToken();
   if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
   if (!isFormData && body) headers["Content-Type"] = "application/json";
 
@@ -372,7 +381,16 @@ async function apiCall(method, path, body = null, isFormData = false) {
     });
 
     if (res.status === 401) {
-      logout();
+      console.warn("401 Unauthorized encountered on:", path);
+      if (authToken) {
+        logout();
+        toast(
+          currentLang === "kn"
+            ? "ಅಧಿವೇಶನದ ಅವಧಿ ಮುಗಿದಿದೆ, ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರವೇಶಿಸಿ."
+            : "Session expired or invalid credentials. Please sign in again.",
+          "warning"
+        );
+      }
       return null;
     }
 
@@ -561,7 +579,10 @@ function updateTeacherUI() {
   }
 }
 
-function showPage(page) {
+function showPage(page, event = null) {
+  if (event && event.preventDefault) event.preventDefault();
+  if (!page) return;
+
   const appShell = document.getElementById("app-shell");
   const loginPage = document.getElementById("page-login");
 
@@ -610,7 +631,7 @@ async function loadDashboardMetrics() {
   const [studentsRes, syncRes, attRes] = await Promise.all([
     apiCall("GET", "/students?limit=5"),
     apiCall("GET", "/sync/status"),
-    apiCall("GET", "/attendance/summary"),
+    apiCall("GET", "/attendance/report?limit=1"),
   ]);
 
   const totalStudents = studentsRes?.data?.data?.total || cachedStudents.length || 0;
@@ -626,8 +647,8 @@ async function loadDashboardMetrics() {
   if (statTotalEl) statTotalEl.textContent = totalStudents;
   if (statPendingEl) statPendingEl.textContent = pendingCount;
   if (statAttEl) {
-    const present = attRes?.data?.data?.present_days ?? totalStudents;
-    statAttEl.textContent = `${present} ದಾಖಲೆ`;
+    const totalAtt = attRes?.data?.data?.total || 0;
+    statAttEl.textContent = `${totalAtt} ದಾಖಲೆ`;
   }
   if (statSyncEl) statSyncEl.textContent = lastSyncText;
 
@@ -1247,6 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Session check
+  authToken = getStoredToken();
   if (authToken) {
     updateTeacherUI();
     showPage("dashboard");

@@ -1,13 +1,19 @@
 /**
- * sw.js — SATS Companion Service Worker
+ * sw.js — SATS Companion Service Worker (v2.1)
  * 
- * Implements offline caching strategy:
- * - Cache-first for static assets (HTML, JS, CSS)
- * - Network-first with local fallback for API calls
+ * Offline caching strategy:
+ * - Network-first with cache fallback for HTML and app scripts (ensures fresh updates)
+ * - Cache fallback when offline for zero-latency offline experience
+ * - Background queue sync for mutations
  */
 
-const CACHE_NAME = "sats-companion-v1";
-const STATIC_ASSETS = ["/", "/static/app.js", "/static/manifest.json"];
+const CACHE_NAME = "sats-companion-v2.1";
+const STATIC_ASSETS = [
+  "/",
+  "/static/index.html",
+  "/static/app.js",
+  "/static/manifest.json"
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -22,7 +28,10 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+        keys.filter((k) => k !== CACHE_NAME).map((k) => {
+          console.log("[SW] Deleting old cache:", k);
+          return caches.delete(k);
+        })
       )
     )
   );
@@ -32,7 +41,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
-  // API calls: Network first
+  // 1. API calls: Network-first, fallback to offline 503 response if offline
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -49,16 +58,20 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets: cache-first
+  // 2. Static assets & HTML: Network-first, fallback to Cache when offline
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return cached || fetch(event.request).then((response) => {
-        if (response.ok && event.request.method === "GET") {
-          const clone = response.clone();
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse.ok && event.request.method === "GET") {
+          const clone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
-        return response;
-      });
-    })
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cached) => {
+          return cached || caches.match("/");
+        });
+      })
   );
 });
