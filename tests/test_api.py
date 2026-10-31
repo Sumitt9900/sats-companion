@@ -705,3 +705,73 @@ class TestPWAStaticFiles:
         manifest = r.json()
         assert manifest["name"] == "SATS Companion"
         assert manifest["display"] == "standalone"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 12. SATS MARKS BRIDGE (UNIVERSAL INGESTOR)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestMarksBridge:
+    def test_marks_bridge_parse_csv(self, client, hm_token):
+        csv_data = "SATS ID,Student Name,Marks\nSATS2901001,Darshan Gowda,19.5\nSATS2901002,Bhavya R,18\n"
+        r = client.post(
+            "/api/v1/marks-bridge/parse",
+            headers={"Authorization": f"Bearer {hm_token}"},
+            files={"file": ("score_sheet.csv", csv_data.encode(), "text/csv")},
+            data={"subject": "Mathematics", "assessment_type": "FA1", "max_marks": "20"}
+        )
+        assert r.status_code == 200
+        d = r.json()
+        assert d["status"] == "success"
+        records = d["data"]["records"]
+        assert len(records) == 2
+        assert records[0]["student_sats_id"] == "SATS2901001"
+        assert records[0]["marks_obtained"] == 19.5
+        assert records[0]["match_status"] == "exact"
+
+    def test_marks_bridge_batch_commit(self, client, hm_token):
+        records = [
+            {
+                "student_sats_id": "SATS2901001",
+                "student_name": "Darshan Gowda",
+                "current_class": "8",
+                "subject": "Mathematics",
+                "assessment_type": "FA1",
+                "marks_obtained": 19.0,
+                "max_marks": 20.0
+            }
+        ]
+        r = client.post(
+            "/api/v1/marks-bridge/batch-commit",
+            headers={"Authorization": f"Bearer {hm_token}"},
+            json={"records": records, "school_dise_code": TEST_SCHOOL_DISE}
+        )
+        assert r.status_code == 200
+        assert r.json()["status"] == "success"
+        assert r.json()["data"]["total"] >= 1
+
+    def test_marks_bridge_export_sats_format(self, client, hm_token):
+        records = [
+            {
+                "student_sats_id": "SATS2901001",
+                "student_name": "Darshan Gowda",
+                "current_class": "8",
+                "subject": "Mathematics",
+                "assessment_type": "FA1",
+                "marks_obtained": 19.0,
+                "max_marks": 20.0
+            }
+        ]
+        r = client.post(
+            "/api/v1/marks-bridge/export-sats-format",
+            headers={"Authorization": f"Bearer {hm_token}"},
+            json={"records": records, "school_dise_code": TEST_SCHOOL_DISE}
+        )
+        assert r.status_code == 200
+        assert "text/csv" in r.headers["content-type"]
+        assert "Academic_Year" in r.text
+        assert "SATS2901001" in r.text
+
+    def test_marks_bridge_unauthenticated(self, client):
+        r = client.post("/api/v1/marks-bridge/batch-commit", json={"records": []})
+        assert r.status_code == 401

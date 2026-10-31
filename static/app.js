@@ -42,6 +42,7 @@ const I18N = {
     nav_students: "ವಿದ್ಯಾರ್ಥಿಗಳ ಪಟ್ಟಿ",
     nav_attendance: "ದಿನನಿತ್ಯದ ಹಾಜರಾತಿ",
     nav_assessments: "ಮೌಲ್ಯಮಾಪನ / ಅಂಕಗಳು (CCE)",
+    nav_bridge: "SATS ಅಂಕಗಳ ಸೇತು (Marks Bridge)",
     nav_tc: "ವರ್ಗಾವಣೆ ಪತ್ರ (TC)",
     nav_data: "ಮಾಹಿತಿ ಮತ್ತು ಸಿಂಕ್",
     nav_import: "ಸಿಎಸ್‌ವಿ ಆಮದು",
@@ -63,12 +64,27 @@ const I18N = {
     stat_last_sync: "ಕೊನೆಯ ಸಿಂಕ್ ಸಮಯ",
     quick_actions: "⚡ ಶೀಘ್ರ ಕಾರ್ಯಾಚರಣೆಗಳು",
     qa_mark_att: "ಹಾಜರಾತಿ ನಮೂದಿಸಿ",
+    qa_bridge: "SATS ಅಂಕಗಳ ಸೇತು (Marks Bridge)",
     qa_enroll: "ವಿದ್ಯಾರ್ಥಿ ಹೊಸ ನೋಂದಣಿ",
     qa_cce: "ಅಂಕಗಳನ್ನು ನಮೂದಿಸಿ (CCE)",
     qa_tc: "ವರ್ಗಾವಣೆ ಪತ್ರ (TC)",
     qa_import: "ಸಿಎಸ್‌ವಿ ಆಮದು",
     dash_recent_students: "📋 ಇತ್ತೀಚಿನ ವಿದ್ಯಾರ್ಥಿಗಳ ವಿವರ",
     view_all: "ಎಲ್ಲವನ್ನೂ ವೀಕ್ಷಿಸಿ",
+
+    // SATS Marks Bridge
+    bridge_title: "🌉 SATS ಅಂಕಗಳ ಸೇತು (Marks Bridge)",
+    bridge_subtitle: "ಎಕ್ಸೆಲ್ (Excel), ಫೋಟೋ (Photo/Camera), ಅಥವಾ PDF ನಿಂದ ಅಂಕಗಳನ್ನು ಕ್ಷಣಾರ್ಧದಲ್ಲಿ ಕರ್ನಾಟಕ SATS/ನಿರಂತರ ಸ್ವರೂಪಕ್ಕೆ ಪರಿವರ್ತಿಸಿ!",
+    bridge_motto_title: "ಮುಖ್ಯೋಪಾಧ್ಯಾಯರಿಗೆ ಸಹಾಯಕ ಸೇತು (Bridge for Headmasters):",
+    bridge_motto_desc: "ಶಿಕ್ಷಕರು ನೀಡುವ ಯಾವುದೇ ನಮೂನೆಯ ಎಕ್ಸೆಲ್ ಶೀಟ್, ಮಾರ್ಕ್ಸ್ ರಿಜಿಸ್ಟರ್ ಫೋಟೋ ಅಥವಾ ಪಿಡಿಎಫ್ ಅನ್ನು ನೇರವಾಗಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ. ನಮ್ಮ ಸಿಸ್ಟಂ ಅದನ್ನು ಕರ್ನಾಟಕ SATS CCE ಸ್ವರೂಪಕ್ಕೆ ಹೊಂದಿಸುತ್ತದೆ. ನೀವು ಒಬ್ಬೊಬ್ಬ ವಿದ್ಯಾರ್ಥಿಯ ಅಂಕಗಳನ್ನು ಗಂಟೆಗಟ್ಟಲೆ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಟೈಪ್ ಮಾಡುವ ಅಗತ್ಯವಿಲ್ಲ!",
+    bridge_upload_heading: "📤 ಅಂಕಪಟ್ಟಿ ಅಪ್‌ಲೋಡ್ (Upload Score Sheet)",
+    bridge_file_label: "ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ (Select File or Capture Photo) *",
+    bridge_extract_btn: "ಡೇಟಾ ಹೊರತೆಗೆದು SATS ಗೆ ಜೋಡಿಸಿ (Extract & Bridge)",
+    bridge_demo_btn: "ಮಾದರಿ ಡೇಟಾ ಪರಿಶೀಲಿಸಿ (Load Demo Sample)",
+    bridge_review_heading: "📋 ಹೊರತೆಗೆದ ಅಂಕಗಳ ಪರಿಶೀಲನೆ (Review & Verify Before SATS Upload)",
+    bridge_action_hint: "ಖಚಿತಪಡಿಸಿಕೊಂಡ ನಂತರ SATS ಗೆ ಬ್ಯಾಚ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
+    bridge_save_sats: "SATS ಗೆ ಬ್ಯಾಚ್ ಸೇವ್ ಮಾಡಿ (Batch Save)",
+    bridge_download_csv: "ಅಧಿಕೃತ SATS/ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್",
 
     // Students
     students_title: "👥 ವಿದ್ಯಾರ್ಥಿ ನಾಮಾವಳಿ",
@@ -158,6 +174,7 @@ const I18N = {
     nav_students: "Student Roster",
     nav_attendance: "Daily Attendance",
     nav_assessments: "CCE Assessments",
+    nav_bridge: "SATS Marks Bridge",
     nav_tc: "Transfer Certificate (TC)",
     nav_data: "Data & Sync",
     nav_import: "CSV Import",
@@ -179,12 +196,27 @@ const I18N = {
     stat_last_sync: "Last Sync Time",
     quick_actions: "⚡ Quick Actions",
     qa_mark_att: "Mark Attendance",
+    qa_bridge: "SATS Marks Bridge (Universal Ingest)",
     qa_enroll: "Enroll Student",
     qa_cce: "Record Marks (CCE)",
     qa_tc: "Transfer Certificate",
     qa_import: "Import CSV",
     dash_recent_students: "📋 Student Roster Overview",
     view_all: "View All",
+
+    // SATS Marks Bridge
+    bridge_title: "🌉 SATS Marks Bridge (Universal Format Ingestor)",
+    bridge_subtitle: "Convert marks from Excel, Photo register, or PDF to Karnataka SATS/Nirantara format in seconds!",
+    bridge_motto_title: "Helping Bridge for Headmasters:",
+    bridge_motto_desc: "Upload any Excel file, notebook photo, or PDF marks sheet provided by teachers. The system standardizes it to Karnataka SATS CCE format, eliminating hours of repetitive manual data entry.",
+    bridge_upload_heading: "📤 Upload Score Sheet",
+    bridge_file_label: "Select File or Capture Photo *",
+    bridge_extract_btn: "Extract & Bridge to SATS",
+    bridge_demo_btn: "Load Demo Sample",
+    bridge_review_heading: "📋 Review & Verify Before SATS Upload",
+    bridge_action_hint: "Verify entries, then batch-upload to SATS or download official Nirantara CSV.",
+    bridge_save_sats: "Batch Save to SATS",
+    bridge_download_csv: "Download Official SATS CSV",
 
     // Students
     students_title: "👥 Student Roster",
@@ -611,6 +643,7 @@ function showPage(page, event = null) {
   else if (page === "students") loadStudentsRoster();
   else if (page === "attendance") initAttendancePage();
   else if (page === "assessments") loadAssessmentsModule();
+  else if (page === "bridge") initBridgePage();
   else if (page === "tc") loadTCModule();
   else if (page === "sync") loadSyncHistory();
 }
@@ -1238,6 +1271,278 @@ async function loadSyncHistory() {
       </tbody>
     </table>
   `;
+}
+
+// ── 8. SATS Marks Bridge Module (Universal Ingestor) ──────────────────────────
+let bridgeExtractedRecords = [];
+
+function initBridgePage() {
+  if (cachedStudents.length === 0) {
+    loadStudentsRoster();
+  }
+}
+
+async function handleBridgeParse(e) {
+  e.preventDefault();
+  const fileInput = document.getElementById("bridge-file-input");
+  const subject = document.getElementById("bridge-subject").value;
+  const assessmentType = document.getElementById("bridge-type").value;
+  const maxMarks = document.getElementById("bridge-max-marks").value;
+  const btn = document.getElementById("bridge-extract-btn");
+
+  if (!fileInput || !fileInput.files[0]) {
+    toast(currentLang === "kn" ? "ದಯವಿಟ್ಟು ಅಂಕಪಟ್ಟಿಯ ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ." : "Please select a score sheet file first.", "warning");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+  formData.append("subject", subject);
+  formData.append("assessment_type", assessmentType);
+  formData.append("max_marks", maxMarks);
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `⏳ ${currentLang === "kn" ? "ಡೇಟಾ ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ..." : "Extracting & Matching..."}`;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/marks-bridge/parse`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${getStoredToken()}` },
+      body: formData,
+    });
+
+    const envelope = await res.json();
+    if (!res.ok) {
+      throw new Error(envelope.detail || "Error parsing marks file");
+    }
+
+    const data = envelope.data || {};
+    bridgeExtractedRecords = data.records || [];
+
+    toast(
+      currentLang === "kn"
+        ? `✅ ಯಶಸ್ವಿಯಾಗಿ ${bridgeExtractedRecords.length} ಅಂಕಗಳ ದಾಖಲೆಗಳನ್ನು SATS ಗೆ ಜೋಡಿಸಲಾಗಿದೆ!`
+        : `✅ Successfully extracted and matched ${bridgeExtractedRecords.length} marks records!`,
+      "success"
+    );
+
+    renderBridgeRecords(data);
+  } catch (err) {
+    toast(`Bridge Error: ${err.message}`, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `⚡ ${t("bridge_extract_btn")}`;
+    }
+  }
+}
+
+function loadBridgeSampleDemo() {
+  const subject = document.getElementById("bridge-subject")?.value || "Mathematics";
+  const assessmentType = document.getElementById("bridge-type")?.value || "FA1";
+  const maxMarks = parseFloat(document.getElementById("bridge-max-marks")?.value || "20");
+
+  const sampleMarks = [19.0, 17.5, 18.0, 14.5, 19.5, 16.0, 12.0, 18.5, 15.0, 20.0];
+  const demoRoster = cachedStudents.length > 0 ? cachedStudents : [
+    { sats_id: "SATS2901001", name: "Darshan Gowda", current_class: "8" },
+    { sats_id: "SATS2901002", name: "Bhavya R", current_class: "8" },
+    { sats_id: "SATS2901003", name: "Chetan Kumar", current_class: "8" },
+    { sats_id: "SATS2901004", name: "Deepa M", current_class: "8" },
+    { sats_id: "SATS2901005", name: "Eshwar Naik", current_class: "8" },
+    { sats_id: "SATS2901006", name: "Farzana Begum", current_class: "8" },
+    { sats_id: "SATS2901007", name: "Girish Murthy", current_class: "8" },
+    { sats_id: "SATS2901008", name: "Hemalatha S", current_class: "8" },
+    { sats_id: "SATS2901009", name: "Imran Pasha", current_class: "8" },
+    { sats_id: "SATS2901010", name: "Jyothi Bai", current_class: "8" },
+  ];
+
+  bridgeExtractedRecords = demoRoster.map((s, idx) => {
+    const obtained = sampleMarks[idx % sampleMarks.length];
+    const pct = (obtained / maxMarks) * 100;
+    const grade = pct >= 90 ? "A+" : pct >= 80 ? "A" : pct >= 70 ? "B+" : "B";
+    return {
+      student_sats_id: s.sats_id,
+      student_name: s.name,
+      current_class: s.current_class || "8",
+      subject,
+      assessment_type: assessmentType,
+      marks_obtained: obtained,
+      max_marks: maxMarks,
+      is_absent: false,
+      grade,
+      match_status: "exact"
+    };
+  });
+
+  renderBridgeRecords({
+    records: bridgeExtractedRecords,
+    total: bridgeExtractedRecords.length,
+    matched: bridgeExtractedRecords.length,
+    unmatched: 0,
+    parser_used: "Sample Demo Mark Sheet",
+    school_dise: currentTeacher?.school_dise_code || "29210101001"
+  });
+
+  toast(
+    currentLang === "kn"
+      ? "📋 ಮಾದರಿ SATS CCE ಅಂಕಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲಾಗಿದೆ."
+      : "📋 Loaded demo SATS CCE marks records for review.",
+    "info"
+  );
+}
+
+function renderBridgeRecords(data = {}) {
+  const container = document.getElementById("bridge-results-container");
+  const badgesEl = document.getElementById("bridge-summary-badges");
+  const tbody = document.getElementById("bridge-table-body");
+  if (!container || !tbody) return;
+
+  container.style.display = "block";
+
+  const total = bridgeExtractedRecords.length;
+  const matched = bridgeExtractedRecords.filter(r => r.match_status === "exact" || r.match_status === "name_match").length;
+  const unmatched = total - matched;
+
+  if (badgesEl) {
+    badgesEl.innerHTML = `
+      <span class="gov-badge badge-info">${data.parser_used || "Bridge Parser"}</span>
+      <span class="gov-badge badge-success">🟢 ${currentLang === "kn" ? "ಹೊಂದಿಕೆಯಾಗಿದೆ" : "Matched"}: ${matched}</span>
+      ${unmatched > 0 ? `<span class="gov-badge badge-danger">🔴 ${currentLang === "kn" ? "ಅಪರಿಚಿತ" : "Unmatched"}: ${unmatched}</span>` : ""}
+    `;
+  }
+
+  if (total === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:24px;">ಯಾವುದೇ ಅಂಕಗಳು ಕಂಡುಬಂದಿಲ್ಲ.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = bridgeExtractedRecords.map((r, i) => `
+    <tr>
+      <td>
+        <input type="text" class="form-control" style="width:130px; font-size:12.5px; padding:4px 8px;" value="${r.student_sats_id || ''}" onchange="updateBridgeField(${i}, 'student_sats_id', this.value)" />
+      </td>
+      <td><strong>${r.student_name || 'Student'}</strong></td>
+      <td>ತರಗತಿ ${r.current_class || '8'}</td>
+      <td>${r.subject}</td>
+      <td><span class="gov-badge badge-info">${r.assessment_type}</span></td>
+      <td>
+        <input type="number" step="0.5" class="form-control" style="width:90px; font-weight:700; padding:4px 8px;" value="${r.marks_obtained}" onchange="updateBridgeMarks(${i}, this.value)" min="0" max="${r.max_marks}" />
+      </td>
+      <td>${r.max_marks}</td>
+      <td>
+        <span class="gov-badge ${r.match_status === 'exact' ? 'badge-success' : r.match_status === 'name_match' ? 'badge-warning' : 'badge-danger'}">
+          ${r.match_status === 'exact' ? '🟢 SATS Matched' : r.match_status === 'name_match' ? '🟠 Name Match' : '🔴 Unmatched'}
+        </span>
+      </td>
+      <td>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="removeBridgeRow(${i})" title="Remove">✕</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function updateBridgeField(index, field, value) {
+  if (bridgeExtractedRecords[index]) {
+    bridgeExtractedRecords[index][field] = value.trim();
+  }
+}
+
+function updateBridgeMarks(index, value) {
+  if (bridgeExtractedRecords[index]) {
+    const num = parseFloat(value) || 0;
+    bridgeExtractedRecords[index].marks_obtained = num;
+  }
+}
+
+function removeBridgeRow(index) {
+  bridgeExtractedRecords.splice(index, 1);
+  renderBridgeRecords();
+}
+
+async function handleBridgeCommit() {
+  if (bridgeExtractedRecords.length === 0) {
+    toast("No records to commit", "warning");
+    return;
+  }
+
+  const btn = document.getElementById("bridge-commit-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `⏳ ${currentLang === "kn" ? "SATS ಗೆ ಉಳಿಸಲಾಗುತ್ತಿದೆ..." : "Saving to SATS..."}`;
+  }
+
+  try {
+    const res = await apiCall("POST", "/marks-bridge/batch-commit", {
+      records: bridgeExtractedRecords,
+      school_dise_code: currentTeacher?.school_dise_code || "29210101001"
+    });
+
+    if (res && res.ok) {
+      const data = res.data?.data || {};
+      const total = data.total || bridgeExtractedRecords.length;
+      toast(
+        currentLang === "kn"
+          ? `🎉 ಯಶಸ್ವಿಯಾಗಿದೆ! ${total} ವಿದ್ಯಾರ್ಥಿಗಳ ಅಂಕಗಳನ್ನು SATS ಗೆ ಬ್ಯಾಚ್ ಸೇವ್ ಮಾಡಲಾಗಿದೆ!`
+          : `🎉 Success! Batch saved ${total} marks to SATS & Offline Sync Queue!`,
+        "success"
+      );
+      updateSyncBadge();
+      loadDashboardMetrics();
+    } else {
+      toast(res?.data?.detail || "Commit error", "error");
+    }
+  } catch (err) {
+    toast(`Commit error: ${err.message}`, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `💾 ${t("bridge_save_sats")}`;
+    }
+  }
+}
+
+async function handleBridgeExportCsv() {
+  if (bridgeExtractedRecords.length === 0) {
+    toast("No records to export", "warning");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/marks-bridge/export-sats-format`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${getStoredToken()}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        records: bridgeExtractedRecords,
+        school_dise_code: currentTeacher?.school_dise_code || "29210101001"
+      })
+    });
+
+    if (!res.ok) throw new Error("Could not generate SATS CSV");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sats_cce_marks_upload_${currentTeacher?.school_dise_code || "29210101001"}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    toast(
+      currentLang === "kn"
+        ? "⬇️ ಅಧಿಕೃತ ಕರ್ನಾಟಕ SATS/ನಿರಂತರ CSV ಫೈಲ್ ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ!"
+        : "⬇️ Official Karnataka SATS/Nirantara CSV downloaded successfully!",
+      "success"
+    );
+  } catch (err) {
+    toast(`Export error: ${err.message}`, "error");
+  }
 }
 
 // ── Application Initialization ────────────────────────────────────────────────

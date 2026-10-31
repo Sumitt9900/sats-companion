@@ -754,6 +754,10 @@
         <span class="nav-icon">📝</span>
         <span data-i18n="nav_assessments">ಮೌಲ್ಯಮಾಪನ / ಅಂಕಗಳು (CCE)</span>
       </div>
+      <div class="nav-item" role="button" tabindex="0" data-page="bridge" onclick="showPage('bridge', event)">
+        <span class="nav-icon">🌉</span>
+        <span data-i18n="nav_bridge">SATS ಅಂಕಗಳ ಸೇತು (Marks Bridge)</span>
+      </div>
       <div class="nav-item" role="button" tabindex="0" data-page="tc" onclick="showPage('tc', event)">
         <span class="nav-icon">📜</span>
         <span data-i18n="nav_tc">ವರ್ಗಾವಣೆ ಪತ್ರ (TC Workflow)</span>
@@ -829,11 +833,12 @@
             <h3 data-i18n="quick_actions">⚡ ಶೀಘ್ರ ಕಾರ್ಯಾಚರಣೆಗಳು (Quick Actions)</h3>
           </div>
           <div style="display:flex; gap:12px; flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="showPage('attendance')">📋 <span data-i18n="qa_mark_att">ಹಾಜರಾತಿ ನಮೂದಿಸಿ</span></button>
+            <button class="btn btn-warning" onclick="showPage('bridge', event)">🌉 <span data-i18n="qa_bridge">SATS ಅಂಕಗಳ ಸೇತು (Marks Bridge)</span></button>
+            <button class="btn btn-primary" onclick="showPage('attendance', event)">📋 <span data-i18n="qa_mark_att">ಹಾಜರಾತಿ ನಮೂದಿಸಿ</span></button>
             <button class="btn btn-secondary" onclick="openEnrollStudentModal()">➕ <span data-i18n="qa_enroll">ವಿದ್ಯಾರ್ಥಿ ಹೊಸ ನೋಂದಣಿ</span></button>
-            <button class="btn btn-secondary" onclick="showPage('assessments')">📝 <span data-i18n="qa_cce">ಅಂಕಗಳನ್ನು ನಮೂದಿಸಿ (CCE)</span></button>
-            <button class="btn btn-secondary" onclick="showPage('tc')">📜 <span data-i18n="qa_tc">ವರ್ಗಾವಣೆ ಪತ್ರ (TC)</span></button>
-            <button class="btn btn-secondary" onclick="showPage('import')">📤 <span data-i18n="qa_import">ಸಿಎಸ್‌ವಿ ಆಮದು</span></button>
+            <button class="btn btn-secondary" onclick="showPage('assessments', event)">📝 <span data-i18n="qa_cce">ಅಂಕಗಳನ್ನು ನಮೂದಿಸಿ (CCE)</span></button>
+            <button class="btn btn-secondary" onclick="showPage('tc', event)">📜 <span data-i18n="qa_tc">ವರ್ಗಾವಣೆ ಪತ್ರ (TC)</span></button>
+            <button class="btn btn-secondary" onclick="showPage('import', event)">📤 <span data-i18n="qa_import">ಸಿಎಸ್‌ವಿ ಆಮದು</span></button>
           </div>
         </div>
 
@@ -956,6 +961,132 @@
           </div>
           <div class="table-container" id="assessments-table-container">
             <div class="empty-state"><div class="icon">⏳</div>ಅಂಕಗಳ ವಿವರ ಲೋಡ್ ಆಗುತ್ತಿದೆ...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SATS MARKS BRIDGE (UNIVERSAL INGESTOR) -->
+      <section id="page-bridge" class="page">
+        <div class="gov-page-banner">
+          <div>
+            <h1 data-i18n="bridge_title">🌉 SATS ಅಂಕಗಳ ಸೇತು (Marks Bridge)</h1>
+            <p data-i18n="bridge_subtitle">Excel, ಫೋಟೋ (Photo/Camera), ಅಥವಾ PDF ನಿಂದ ಅಂಕಗಳನ್ನು ಕ್ಷಣಾರ್ಧದಲ್ಲಿ ಕರ್ನಾಟಕ SATS/ನಿರಂತರ ಸ್ವರೂಪಕ್ಕೆ ಪರಿವರ್ತಿಸಿ!</p>
+          </div>
+          <div>
+            <span class="gov-badge badge-warning" style="font-size:12px; padding:6px 12px;">
+              🛡️ SATS & ನಿರಂತರ ಸಹಾಯಕ ಸೇತು (Helping Bridge)
+            </span>
+          </div>
+        </div>
+
+        <!-- Helping Motto Info Box -->
+        <div class="gov-card" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:16px 20px;">
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            <div style="font-size:24px;">💡</div>
+            <div style="font-size:13px; line-height:1.6; color:#14532d;">
+              <strong style="font-size:14px;" data-i18n="bridge_motto_title">ಮುಖ್ಯೋಪಾಧ್ಯಾಯರಿಗೆ ಸಹಾಯಕ ಸೇತು (Bridge for Headmasters):</strong><br>
+              <span data-i18n="bridge_motto_desc">
+                ಶಿಕ್ಷಕರು ನೀಡುವ ಯಾವುದೇ ನಮೂನೆಯ ಎಕ್ಸೆಲ್ ಶೀಟ್, ಮಾರ್ಕ್ಸ್ ರಿಜಿಸ್ಟರ್ ಫೋಟೋ ಅಥವಾ ಪಿಡಿಎಫ್ ಅನ್ನು ನೇರವಾಗಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ. ನಮ್ಮ ಸಿಸ್ಟಂ ಅದನ್ನು ಕರ್ನಾಟಕ SATS CCE ಸ್ವರೂಪಕ್ಕೆ ಹೊಂದಿಸುತ್ತದೆ. ನೀವು ಒಬ್ಬೊಬ್ಬ ವಿದ್ಯಾರ್ಥಿಯ ಅಂಕಗಳನ್ನು ಗಂಟೆಗಟ್ಟಲೆ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಟೈಪ್ ಮಾಡುವ ಅಗತ್ಯವಿಲ್ಲ!
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ingestion Form Card -->
+        <div class="gov-card">
+          <div class="gov-card-header">
+            <h3 data-i18n="bridge_upload_heading">📤 ಅಂಕಪಟ್ಟಿ ಅಪ್‌ಲೋಡ್ (Upload Score Sheet)</h3>
+            <span style="font-size:12px; color:var(--text-muted);">ಬೆಂಬಲಿತ ಮಾದರಿಗಳು: .xlsx, .xls, .csv, .pdf, .jpg, .png</span>
+          </div>
+
+          <form id="marks-bridge-upload-form" onsubmit="handleBridgeParse(event)">
+            <div class="form-row">
+              <div class="form-group" style="flex:2;">
+                <label class="form-label" data-i18n="bridge_file_label">ಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ (Select File or Capture Photo) *</label>
+                <input type="file" id="bridge-file-input" class="form-control" accept=".xlsx,.xls,.csv,.pdf,.jpg,.jpeg,.png,.webp" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="lbl_subject">ವಿಷಯ (Default Subject)</label>
+                <select id="bridge-subject" class="form-control">
+                  <option value="Mathematics">ಗಣಿತ (Mathematics)</option>
+                  <option value="Science">ವಿಜ್ಞಾನ (Science)</option>
+                  <option value="Social Science">ಸಮಾಜ ವಿಜ್ಞಾನ (Social Science)</option>
+                  <option value="Kannada">ಕನ್ನಡ (First Language)</option>
+                  <option value="English">ಇಂಗ್ಲಿಷ್ (Second Language)</option>
+                  <option value="Hindi">ಹಿಂದಿ (Third Language)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="lbl_test_type">ಪರೀಕ್ಷಾ ಪ್ರಕಾರ (Term / Type)</label>
+                <select id="bridge-type" class="form-control">
+                  <option value="FA1">FA1 (ರೂಪಣಾತ್ಮಕ-1)</option>
+                  <option value="FA2">FA2 (ರೂಪಣಾತ್ಮಕ-2)</option>
+                  <option value="SA1">SA1 (ಸಂಕಲನಾತ್ಮಕ-1)</option>
+                  <option value="FA3">FA3 (ರೂಪಣಾತ್ಮಕ-3)</option>
+                  <option value="FA4">FA4 (ರೂಪಣಾತ್ಮಕ-4)</option>
+                  <option value="SA2">SA2 (ಸಂಕಲನಾತ್ಮಕ-2)</option>
+                </select>
+              </div>
+              <div class="form-group" style="max-width:140px;">
+                <label class="form-label" data-i18n="lbl_max_marks">ಗರಿಷ್ಠ ಅಂಕ (Max)</label>
+                <input type="number" id="bridge-max-marks" class="form-control" value="20" required min="1" />
+              </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; flex-wrap:wrap; gap:10px;">
+              <button type="submit" class="btn btn-primary" id="bridge-extract-btn" style="padding:10px 20px;">
+                ⚡ <span data-i18n="bridge_extract_btn">ಡೇಟಾ ಹೊರತೆಗೆದು SATS ಗೆ ಜೋಡಿಸಿ (Extract & Bridge)</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="loadBridgeSampleDemo()">
+                📋 <span data-i18n="bridge_demo_btn">ಮಾದರಿ ಡೇಟಾ ಪರಿಶೀಲಿಸಿ (Load Demo Sample)</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Extraction Results & Verification Grid -->
+        <div id="bridge-results-container" style="display:none;">
+          <div class="gov-card">
+            <div class="gov-card-header">
+              <h3 data-i18n="bridge_review_heading">📋 ಹೊರತೆಗೆದ ಅಂಕಗಳ ಪರಿಶೀಲನೆ (Review & Verify Before SATS Upload)</h3>
+              <div id="bridge-summary-badges"></div>
+            </div>
+
+            <div class="table-container" style="margin-bottom:16px;">
+              <table class="gov-table" id="bridge-results-table">
+                <thead>
+                  <tr>
+                    <th>SATS ID</th>
+                    <th>ವಿದ್ಯಾರ್ಥಿ ಹೆಸರು</th>
+                    <th>ತರಗತಿ</th>
+                    <th>ವಿಷಯ</th>
+                    <th>ಪರೀಕ್ಷೆ</th>
+                    <th>ಪಡೆದ ಅಂಕ</th>
+                    <th>ಗರಿಷ್ಠ ಅಂಕ</th>
+                    <th>ಸ್ಥಿತಿ</th>
+                    <th>ಕ್ರಮ</th>
+                  </tr>
+                </thead>
+                <tbody id="bridge-table-body"></tbody>
+              </table>
+            </div>
+
+            <!-- Batch Actions Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:14px; background:#f8fafc; border-radius:4px; border:1px solid var(--border-light);">
+              <div>
+                <span style="font-size:12.5px; color:var(--text-muted);" data-i18n="bridge_action_hint">
+                  ಖಚಿತಪಡಿಸಿಕೊಂಡ ನಂತರ SATS ಗೆ ಬ್ಯಾಚ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.
+                </span>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn btn-success" onclick="handleBridgeCommit()" id="bridge-commit-btn" style="padding:10px 20px;">
+                  💾 <span data-i18n="bridge_save_sats">SATS ಗೆ ಬ್ಯಾಚ್ ಸೇವ್ ಮಾಡಿ (Batch Save)</span>
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="handleBridgeExportCsv()" id="bridge-export-btn">
+                  ⬇️ <span data-i18n="bridge_download_csv">ಅಧಿಕೃತ SATS/ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </section>
