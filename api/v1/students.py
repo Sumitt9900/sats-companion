@@ -10,6 +10,7 @@ DELETE /api/v1/students/{sats_id}  — Soft-delete (mark withdrawn)
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from core.databsae import get_db
@@ -31,6 +32,7 @@ def list_students(
     section: Optional[str] = Query(None, description="Filter by section e.g. 'A'"),
     gender: Optional[str] = Query(None, description="Filter by gender: male/female/other"),
     caste_category: Optional[str] = Query(None, description="Filter: general/obc/sc/st"),
+    search: Optional[str] = Query(None, description="Search by student name or SATS ID"),
     is_active: Optional[bool] = Query(True, description="Include only active students"),
     limit: int = Query(20, ge=1, le=500),
     offset: int = Query(0, ge=0),
@@ -57,6 +59,9 @@ def list_students(
         query = query.filter(Student.gender == gender)
     if caste_category:
         query = query.filter(Student.caste_category == caste_category)
+    if search:
+        term = f"%{search.strip()}%"
+        query = query.filter(or_(Student.name.ilike(term), Student.sats_id.ilike(term)))
 
     total = query.count()
     students = query.order_by(Student.name).offset(offset).limit(limit).all()

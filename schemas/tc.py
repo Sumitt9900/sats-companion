@@ -20,7 +20,7 @@ class TCRequest(BaseModel):
 class TCApproval(BaseModel):
     """Request body for PUT /tc/{tc_id}/approve."""
 
-    status: TCStatus = Field(..., description="New status — typically 'approved' or 'rejected'")
+    status: TCStatus = Field(default=TCStatus.APPROVED, description="New status — typically 'approved' or 'rejected'")
     tc_number: Optional[str] = Field(None, max_length=50, description="Official TC serial number (on approval)")
     issue_date: Optional[date] = None
     remarks: Optional[str] = None

@@ -47,7 +47,7 @@ def mark_bulk_attendance(
     updated = 0
     errors = []
 
-    for entry in payload.entries:
+    for entry in payload.all_entries:
         student = db.query(Student).filter(
             Student.sats_id == entry.student_sats_id,
             Student.is_active == True,
@@ -58,8 +58,10 @@ def mark_bulk_attendance(
 
         existing = db.query(Attendance).filter(
             Attendance.student_sats_id == entry.student_sats_id,
-            Attendance.attendance_date == payload.attendance_date,
+            Attendance.attendance_date == (entry.attendance_date or payload.attendance_date),
         ).first()
+
+        att_date = entry.attendance_date or payload.attendance_date
 
         if existing:
             existing.status = entry.status
@@ -69,7 +71,7 @@ def mark_bulk_attendance(
         else:
             record = Attendance(
                 student_sats_id=entry.student_sats_id,
-                attendance_date=payload.attendance_date,
+                attendance_date=att_date,
                 status=entry.status,
                 remarks=entry.remarks,
                 marked_by_teacher_id=teacher.id,
