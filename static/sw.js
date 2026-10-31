@@ -1,5 +1,5 @@
 /**
- * sw.js — SATS Companion Service Worker (v2.1)
+ * sw.js — SATS Companion Service Worker (v2.2)
  * 
  * Offline caching strategy:
  * - Network-first with cache fallback for HTML and app scripts (ensures fresh updates)
@@ -7,7 +7,7 @@
  * - Background queue sync for mutations
  */
 
-const CACHE_NAME = "sats-companion-v2.1";
+const CACHE_NAME = "sats-companion-v2.2";
 const STATIC_ASSETS = [
   "/",
   "/static/index.html",

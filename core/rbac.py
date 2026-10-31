@@ -38,7 +38,7 @@ def require_role(*allowed_roles: UserRole):
     def _check(teacher=Depends(get_current_teacher)):
         teacher_role = getattr(teacher, "role", UserRole.TEACHER)
         # ADMIN always has access
-        if teacher_role == UserRole.ADMIN:
+        if teacher_role == UserRole.ADMIN or getattr(teacher, "is_admin", False):
             return teacher
         if teacher_role not in allowed_roles:
             raise HTTPException(

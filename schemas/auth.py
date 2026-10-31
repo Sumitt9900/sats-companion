@@ -1,6 +1,7 @@
 """
 schemas/auth.py — Pydantic schemas for authentication endpoints.
 """
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -19,7 +20,11 @@ class TokenResponse(BaseModel):
     expires_in: int = Field(description="Token lifetime in seconds")
     teacher_id: str
     name: str
+    role: str = "teacher"
+    designation: Optional[str] = None
     is_admin: bool
+    kgid: Optional[str] = None
+    school_dise_code: Optional[str] = None
 
 
 class RefreshRequest(BaseModel):

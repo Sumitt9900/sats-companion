@@ -543,3 +543,4 @@ def generate_sats_bulk_upload_csv(
         ])
 
     return output.getvalue()
+

@@ -85,6 +85,12 @@ const I18N = {
     bridge_action_hint: "ಖಚಿತಪಡಿಸಿಕೊಂಡ ನಂತರ SATS ಗೆ ಬ್ಯಾಚ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
     bridge_save_sats: "SATS ಗೆ ಬ್ಯಾಚ್ ಸೇವ್ ಮಾಡಿ (Batch Save)",
     bridge_download_csv: "ಅಧಿಕೃತ SATS/ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್",
+    submissions_queue_title: "ಶಿಕ್ಷಕರಿಂದ ಬಂದಿರುವ ಅಂಕಪಟ್ಟಿ ಸಲ್ಲಿಕೆಗಳು (Teacher Submissions Queue)",
+    my_submissions_title: "ನನ್ನ ಅಂಕಪಟ್ಟಿ ಸಲ್ಲಿಕೆಗಳು ಮತ್ತು SATS ಸ್ಥಿತಿ (My Submissions & Status)",
+    btn_submit_to_hm: "ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ ಅನುಮೋದನೆಗೆ ಸಲ್ಲಿಸಿ (Submit to HM)",
+    btn_approve_sats: "ಅನುಮೋದಿಸಿ & SATS ಗೆ ಸಿಂಕ್ ಮಾಡಿ (Approve & Sync)",
+    btn_reject: "ಮರುಪರಿಶೀಲನೆಗೆ ಕಳುಹಿಸಿ (Request Revision)",
+    modal_submit_hm_title: "ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ ಅನುಮೋದನೆಗೆ ಸಲ್ಲಿಸಿ",
 
     // Students
     students_title: "👥 ವಿದ್ಯಾರ್ಥಿ ನಾಮಾವಳಿ",
@@ -217,6 +223,12 @@ const I18N = {
     bridge_action_hint: "Verify entries, then batch-upload to SATS or download official Nirantara CSV.",
     bridge_save_sats: "Batch Save to SATS",
     bridge_download_csv: "Download Official SATS CSV",
+    submissions_queue_title: "Teacher Marks Submissions Queue",
+    my_submissions_title: "My Marks Submissions & SATS Status",
+    btn_submit_to_hm: "Submit to Headmaster for Approval",
+    btn_approve_sats: "Approve & Push to SATS",
+    btn_reject: "Request Revision (Reject)",
+    modal_submit_hm_title: "Submit to Headmaster for Approval",
 
     // Students
     students_title: "👥 Student Roster",
@@ -598,16 +610,31 @@ function updateTeacherUI() {
   const nameEl = document.getElementById("user-name");
   const desigEl = document.getElementById("user-designation");
   const initEl = document.getElementById("user-initials");
+  const chipContainer = document.getElementById("user-chip-container");
+  const roleBadge = document.getElementById("user-role-badge");
+
+  const isHm = currentTeacher.role === "headmaster" || currentTeacher.is_admin || currentTeacher.designation === "headmaster";
+
+  if (chipContainer) {
+    chipContainer.className = isHm ? "user-chip headmaster" : "user-chip teacher";
+  }
+
+  if (roleBadge) {
+    roleBadge.className = isHm ? "role-badge headmaster" : "role-badge teacher";
+    roleBadge.textContent = isHm
+      ? (currentLang === "kn" ? "ಮುಖ್ಯೋಪಾಧ್ಯಾಯರು" : "Headmaster")
+      : (currentLang === "kn" ? "ಶಿಕ್ಷಕರು" : "Teacher");
+  }
 
   if (nameEl) nameEl.textContent = currentTeacher.name || currentTeacher.kgid || "Teacher";
   if (desigEl) {
-    const isHm = currentTeacher.is_admin || currentTeacher.designation === "headmaster";
     desigEl.textContent = isHm
-      ? (currentLang === "kn" ? "ಮುಖ್ಯೋಪಾಧ್ಯಾಯರು (HM)" : "Headmaster")
-      : (currentLang === "kn" ? "ಸಹ ಶಿಕ್ಷಕರು (Teacher)" : "Assistant Teacher");
+      ? (currentLang === "kn" ? "ಪ್ರೌಢಶಾಲಾ ಮುಖ್ಯೋಪಾಧ್ಯಾಯರು (HM)" : "Headmaster & SATS Officer")
+      : (currentLang === "kn" ? "ಸಹ ಶಿಕ್ಷಕರು (Assistant Teacher)" : "Assistant Teacher");
   }
-  if (initEl && currentTeacher.name) {
-    initEl.textContent = currentTeacher.name.split(" ").map(w => w[0]).slice(0, 2).join("").toUpperCase();
+  if (initEl) {
+    initEl.className = isHm ? "user-avatar headmaster" : "user-avatar teacher";
+    initEl.textContent = isHm ? "👑" : "📖";
   }
 }
 
@@ -684,6 +711,37 @@ async function loadDashboardMetrics() {
     statAttEl.textContent = `${totalAtt} ದಾಖಲೆ`;
   }
   if (statSyncEl) statSyncEl.textContent = lastSyncText;
+
+  // Headmaster Pending Submissions Notification Banner
+  const isHm = currentTeacher?.role === "headmaster" || currentTeacher?.is_admin || currentTeacher?.designation === "headmaster";
+  const hmBanner = document.getElementById("dash-hm-notification-banner");
+  if (isHm && hmBanner) {
+    try {
+      const subRes = await apiCall("GET", "/marks-bridge/submissions?status_filter=pending_approval");
+      const pendingSubCount = subRes?.data?.data?.pending_count || 0;
+      if (pendingSubCount > 0) {
+        hmBanner.style.display = "block";
+        const titleEl = document.getElementById("dash-hm-alert-title");
+        const descEl = document.getElementById("dash-hm-alert-desc");
+        if (titleEl) {
+          titleEl.textContent = currentLang === "kn"
+            ? `🔔 ಗಮನಿಸಿ: ಶಿಕ್ಷಕರಿಂದ ${pendingSubCount} ಅಂಕಪಟ್ಟಿಗಳು ಅನುಮೋದನೆಗೆ ಬಾಕಿ ಇವೆ!`
+            : `🔔 Attention: ${pendingSubCount} marks submission(s) from teachers awaiting HM approval!`;
+        }
+        if (descEl) {
+          descEl.textContent = currentLang === "kn"
+            ? "ಶಿಕ್ಷಕರು ಅಪ್‌ಲೋಡ್ ಮಾಡಿರುವ ಅಂಕಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಒಂದೇ ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಅಧಿಕೃತ SATS ಗೆ ಸಿಂಕ್ ಮಾಡಿ."
+            : "Review mark sheets submitted by teachers and push directly to official SATS.";
+        }
+      } else {
+        hmBanner.style.display = "none";
+      }
+    } catch {
+      hmBanner.style.display = "none";
+    }
+  } else if (hmBanner) {
+    hmBanner.style.display = "none";
+  }
 
   // Mini students preview
   const recentTable = document.getElementById("dash-recent-students-table");
@@ -1273,12 +1331,497 @@ async function loadSyncHistory() {
   `;
 }
 
-// ── 8. SATS Marks Bridge Module (Universal Ingestor) ──────────────────────────
+// ── 8. SATS Marks Bridge Module (Universal Ingestor with RBAC) ────────────────
 let bridgeExtractedRecords = [];
+let currentSubmissionsList = [];
+let activeReviewingSubmission = null;
+let currentSubmissionFilter = "all";
+let pendingRejectSubmissionId = null;
+
+function isCurrentHeadmaster() {
+  return currentTeacher?.role === "headmaster" || currentTeacher?.is_admin || currentTeacher?.designation === "headmaster";
+}
 
 function initBridgePage() {
   if (cachedStudents.length === 0) {
     loadStudentsRoster();
+  }
+
+  const isHm = isCurrentHeadmaster();
+  const roleBadge = document.getElementById("bridge-role-badge");
+  const mottoTitle = document.getElementById("bridge-motto-title");
+  const mottoDesc = document.getElementById("bridge-motto-desc");
+  const mottoIcon = document.getElementById("bridge-motto-icon");
+  const hmCard = document.getElementById("bridge-hm-submissions-card");
+  const teacherCard = document.getElementById("bridge-teacher-history-card");
+  const uploadHeading = document.getElementById("bridge-upload-heading");
+
+  if (isHm) {
+    if (roleBadge) {
+      roleBadge.className = "gov-badge badge-warning";
+      roleBadge.innerHTML = "👑 ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ SATS ಕಂಟ್ರೋಲ್ & ಸಿಂಕ್ (HM Control)";
+    }
+    if (mottoTitle) mottoTitle.textContent = currentLang === "kn" ? "ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ SATS ಕಂಟ್ರೋಲ್ (Headmaster Control Center):" : "Headmaster SATS Command Center:";
+    if (mottoDesc) mottoDesc.textContent = currentLang === "kn"
+      ? "ಶಿಕ್ಷಕರು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಕಳುಹಿಸಿರುವ ಅಂಕಪಟ್ಟಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ, ಒಂದೇ ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಅಧಿಕೃತ SATS ಗೆ ಅನುಮೋದಿಸಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ಬಲ್ಕ್ CSV ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ."
+      : "Review mark sheets submitted by teachers, batch-approve and push directly to Karnataka SATS, or export official bulk upload CSV.";
+    if (mottoIcon) mottoIcon.textContent = "👑";
+    if (hmCard) hmCard.style.display = "block";
+    if (teacherCard) teacherCard.style.display = "none";
+    if (uploadHeading) uploadHeading.textContent = currentLang === "kn" ? "📤 ನೇರ ಅಂಕಪಟ್ಟಿ ಅಪ್‌ಲೋಡ್ (HM Direct Upload)" : "📤 Direct Score Sheet Upload (HM Mode)";
+  } else {
+    if (roleBadge) {
+      roleBadge.className = "gov-badge badge-success";
+      roleBadge.innerHTML = "👩‍🏫 ಶಿಕ್ಷಕರ ಅಂಕ ಸಲ್ಲಿಕೆ ಪೋರ್ಟಲ್ (Teacher Portal)";
+    }
+    if (mottoTitle) mottoTitle.textContent = currentLang === "kn" ? "ಶಿಕ್ಷಕರ ಸಹಾಯಕ ಸೇತು (Teacher Ingestion & Submission):" : "Teacher Score Sheet Ingest & Submit:";
+    if (mottoDesc) mottoDesc.textContent = currentLang === "kn"
+      ? "ನಿಮ್ಮ ಮೊಬೈಲ್ ಕ್ಯಾಮೆರಾದಿಂದ ಮಾರ್ಕ್ಸ್ ರಿಜಿಸ್ಟರ್ ಫೋಟೋ ತೆಗೆದು ಅಥವಾ ಎಕ್ಸೆಲ್ ಶೀಟ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ. ಡೇಟಾ ಪರಿಶೀಲಿಸಿದ ನಂತರ ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ ಅನುಮೋದನೆಗೆ ಸಲ್ಲಿಸಿ."
+      : "Upload physical register photos via camera or Excel score sheets. Review candidate marks, then submit to Headmaster for official SATS push.";
+    if (mottoIcon) mottoIcon.textContent = "👩‍🏫";
+    if (hmCard) hmCard.style.display = "none";
+    if (teacherCard) teacherCard.style.display = "block";
+    if (uploadHeading) uploadHeading.textContent = currentLang === "kn" ? "📤 ತರಗತಿ ಅಂಕಪಟ್ಟಿ ಅಪ್‌ಲೋಡ್ (Teacher Upload)" : "📤 Class Score Sheet Upload (Teacher Mode)";
+  }
+
+  loadSubmissionsQueue();
+  renderBridgeActionButtons();
+}
+
+async function loadSubmissionsQueue(filter = currentSubmissionFilter) {
+  const isHm = isCurrentHeadmaster();
+  const hmContainer = document.getElementById("bridge-submissions-table-container");
+  const teacherContainer = document.getElementById("bridge-teacher-history-container");
+
+  try {
+    const res = await apiCall("GET", "/marks-bridge/submissions");
+    if (res && res.ok) {
+      currentSubmissionsList = res.data?.data?.submissions || [];
+      renderSubmissionsQueue(filter);
+    } else {
+      if (hmContainer && isHm) hmContainer.innerHTML = `<div class="empty-state">ಸಲ್ಲಿಕೆಗಳನ್ನು ಪಡೆಯಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ.</div>`;
+      if (teacherContainer && !isHm) teacherContainer.innerHTML = `<div class="empty-state">ಸಲ್ಲಿಕೆಗಳನ್ನು ಪಡೆಯಲು ಸಾಧ್ಯವಾಗಿಲ್ಲ.</div>`;
+    }
+  } catch (err) {
+    if (hmContainer && isHm) hmContainer.innerHTML = `<div class="empty-state">Error: ${err.message}</div>`;
+  }
+}
+
+function filterSubmissionsQueue(filter) {
+  currentSubmissionFilter = filter;
+  document.querySelectorAll(".filter-tab").forEach(b => b.classList.remove("active"));
+  const activeBtn = document.getElementById(`sub-filter-${filter === "pending_approval" ? "pending" : filter}`);
+  if (activeBtn) activeBtn.classList.add("active");
+  renderSubmissionsQueue(filter);
+}
+
+function renderSubmissionsQueue(filter = currentSubmissionFilter) {
+  const isHm = isCurrentHeadmaster();
+  let list = currentSubmissionsList;
+  if (filter && filter !== "all") {
+    list = list.filter(s => s.status === filter);
+  }
+
+  if (isHm) {
+    const container = document.getElementById("bridge-submissions-table-container");
+    if (!container) return;
+
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">📭</div>${currentLang === "kn" ? "ಯಾವುದೇ ಸಲ್ಲಿಕೆಗಳು ಕಂಡುಬಂದಿಲ್ಲ." : "No submissions in this filter."}</div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="gov-table">
+        <thead>
+          <tr>
+            <th>ಸಲ್ಲಿಕೆದಾರ ಶಿಕ್ಷಕರು (Teacher)</th>
+            <th>ವಿಷಯ (Subject)</th>
+            <th>ಪರೀಕ್ಷೆ (Type)</th>
+            <th>ತರಗತಿ</th>
+            <th>ದಾಖಲೆಗಳು (Records)</th>
+            <th>ದಿನಾಂಕ (Date)</th>
+            <th>ಸ್ಥಿತಿ (Status)</th>
+            <th>ಕಾರ್ಯಾಚರಣೆ (Actions)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(s => {
+            const isPending = s.status === "pending_approval";
+            const isApproved = s.status === "approved";
+            const isRejected = s.status === "rejected";
+            const statusBadge = isApproved
+              ? `<span class="gov-badge badge-success">🟢 ಅನುಮೋದಿತ (SATS Synced)</span>`
+              : isRejected
+              ? `<span class="gov-badge badge-danger">🔴 ತಿರಸ್ಕೃತ (Revision Requested)</span>`
+              : `<span class="gov-badge badge-warning">🟡 ಅನುಮೋದನೆ ಬಾಕಿ</span>`;
+
+            return `
+              <tr style="${activeReviewingSubmission?.id === s.id ? 'background:#eff6ff;' : ''}">
+                <td>
+                  <strong>${s.submitted_by_name || 'Teacher'}</strong><br>
+                  <small style="color:var(--text-muted);">${s.submitted_by_kgid || ''}</small>
+                </td>
+                <td>${s.subject}</td>
+                <td><span class="gov-badge badge-info">${s.assessment_type}</span></td>
+                <td>${s.target_class || '8'}-${s.section || 'A'}</td>
+                <td><strong>${s.total_records}</strong> ವಿದ್ಯಾರ್ಥಿಗಳು</td>
+                <td>${s.created_at ? new Date(s.created_at).toLocaleDateString() : '-'}</td>
+                <td>${statusBadge}</td>
+                <td>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="reviewSubmission('${s.id}')" title="Review candidate marks">
+                      👁️ ಪರಿಶೀಲಿಸಿ
+                    </button>
+                    ${isPending ? `
+                      <button type="button" class="btn btn-success btn-sm" onclick="approveSubmissionDirect('${s.id}')" title="Approve and push directly to SATS">
+                        🚀 SATS ಗೆ ಅಪ್‌ಲೋಡ್
+                      </button>
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="openRejectSubmissionModal('${s.id}')" title="Return to teacher with revision notes" style="color:#b91c1c;">
+                        ❌ ತಿರಸ್ಕರಿಸಿ
+                      </button>
+                    ` : ""}
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="exportSubmissionSatsCsv('${s.id}')" title="Download official Karnataka SATS CCE CSV">
+                      ⬇️ SATS CSV
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  } else {
+    // Teacher's view of their submissions
+    const container = document.getElementById("bridge-teacher-history-container");
+    if (!container) return;
+
+    if (list.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="icon">📝</div>${currentLang === "kn" ? "ನೀವು ಇನ್ನೂ ಯಾವುದೇ ಅಂಕಪಟ್ಟಿಯನ್ನು ಮುಖ್ಯೋಪಾಧ್ಯಾಯರಿಗೆ ಸಲ್ಲಿಸಿಲ್ಲ." : "You have not submitted any score sheets yet."}</div>`;
+      return;
+    }
+
+    container.innerHTML = `
+      <table class="gov-table">
+        <thead>
+          <tr>
+            <th>ವಿಷಯ (Subject)</th>
+            <th>ಪರೀಕ್ಷೆ (Type)</th>
+            <th>ತರಗತಿ</th>
+            <th>ವಿದ್ಯಾರ್ಥಿಗಳು</th>
+            <th>ಸಲ್ಲಿಕೆ ದಿನಾಂಕ</th>
+            <th>ಸ್ಥಿತಿ (Status)</th>
+            <th>HM ಹಿಮ್ಮಾಹಿತಿ (Feedback)</th>
+            <th>ಕ್ರಮ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${list.map(s => {
+            const isApproved = s.status === "approved";
+            const isRejected = s.status === "rejected";
+            const statusBadge = isApproved
+              ? `<span class="gov-badge badge-success">🟢 HM ಅನುಮೋದಿಸಿದೆ (SATS ಗೆ ಸೇರಿದೆ)</span>`
+              : isRejected
+              ? `<span class="gov-badge badge-danger">🔴 ಮರುಪರಿಶೀಲನೆ ಅಗತ್ಯ</span>`
+              : `<span class="gov-badge badge-warning">🟡 HM ಅನುಮೋದನೆಗೆ ಬಾಕಿ ಇದೆ</span>`;
+
+            return `
+              <tr>
+                <td><strong>${s.subject}</strong></td>
+                <td><span class="gov-badge badge-info">${s.assessment_type}</span></td>
+                <td>${s.target_class || '8'}-${s.section || 'A'}</td>
+                <td>${s.total_records}</td>
+                <td>${s.created_at ? new Date(s.created_at).toLocaleDateString() : '-'}</td>
+                <td>${statusBadge}</td>
+                <td><small style="color:${isRejected ? '#b91c1c' : '#334155'}; font-style:italic;">${s.hm_review_notes || s.submission_notes || '—'}</small></td>
+                <td>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="reviewSubmission('${s.id}')">
+                    👁️ ವೀಕ್ಷಿಸಿ (View)
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+}
+
+async function reviewSubmission(submissionId) {
+  try {
+    const res = await apiCall("GET", `/marks-bridge/submissions/${submissionId}`);
+    if (!res || !res.ok) throw new Error("Could not fetch submission details");
+
+    const data = res.data?.data || {};
+    activeReviewingSubmission = data;
+    bridgeExtractedRecords = data.records || [];
+
+    // Show active context banner
+    const banner = document.getElementById("bridge-active-context-banner");
+    const titleEl = document.getElementById("bridge-context-title");
+    const metaEl = document.getElementById("bridge-context-meta");
+
+    if (banner) {
+      banner.style.display = "block";
+      if (titleEl) {
+        titleEl.textContent = `${currentLang === "kn" ? "ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿರುವ ಸಲ್ಲಿಕೆ:" : "Reviewing Submission:"} ${data.subject} (${data.assessment_type}) - ${data.target_class || '8'}${data.section || 'A'}`;
+      }
+      if (metaEl) {
+        metaEl.textContent = `${currentLang === "kn" ? "ಸಲ್ಲಿಕೆದಾರರು:" : "Submitted by:"} ${data.submitted_by_name} (${data.submitted_by_kgid}) | ಒಟ್ಟು ${data.total_records} ವಿದ್ಯಾರ್ಥಿಗಳು | ಸ್ಥಿತಿ: ${data.status.toUpperCase()} ${data.submission_notes ? ` | ಟಿಪ್ಪಣಿ: "${data.submission_notes}"` : ""}`;
+      }
+    }
+
+    renderBridgeRecords({
+      parser_used: `Submission from ${data.submitted_by_name}`,
+      school_dise: data.school_dise_code
+    });
+
+    renderBridgeActionButtons();
+
+    // Scroll to results container smoothly
+    const resultsContainer = document.getElementById("bridge-results-container");
+    if (resultsContainer) {
+      resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  } catch (err) {
+    toast(`Error loading submission: ${err.message}`, "error");
+  }
+}
+
+function closeBridgeActiveContext() {
+  activeReviewingSubmission = null;
+  const banner = document.getElementById("bridge-active-context-banner");
+  if (banner) banner.style.display = "none";
+  renderBridgeActionButtons();
+}
+
+function renderBridgeActionButtons() {
+  const wrap = document.getElementById("bridge-action-buttons-wrap");
+  const hintEl = document.getElementById("bridge-action-hint-text");
+  if (!wrap) return;
+
+  const isHm = isCurrentHeadmaster();
+
+  if (!isHm) {
+    // TEACHER ACTIONS
+    if (hintEl) {
+      hintEl.textContent = currentLang === "kn"
+        ? "ಅಂಕಗಳನ್ನು ಪರಿಶೀಲಿಸಿದ ನಂತರ ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ (HM) ಅನುಮೋದನೆಗೆ ಸಲ್ಲಿಸಿ. HM ಅನುಮೋದಿಸಿದ ತಕ್ಷಣ SATS ಗೆ ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತದೆ."
+        : "Verify extracted marks and submit to Headmaster for official SATS approval & push.";
+    }
+
+    wrap.innerHTML = `
+      <button type="button" class="btn btn-success" onclick="openSubmitBridgeModal()" id="bridge-submit-hm-btn" style="padding:10px 20px; font-weight:700;">
+        📨 <span data-i18n="btn_submit_to_hm">ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ ಅನುಮೋದನೆಗೆ ಸಲ್ಲಿಸಿ (Submit to HM)</span>
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="handleBridgeExportCsv()" id="bridge-export-btn">
+        ⬇️ <span>CSV ಪೂರ್ವವೀಕ್ಷಣೆ (Download Preview CSV)</span>
+      </button>
+    `;
+  } else {
+    // HEADMASTER ACTIONS
+    if (activeReviewingSubmission) {
+      const isPending = activeReviewingSubmission.status === "pending_approval";
+      if (hintEl) {
+        hintEl.textContent = isPending
+          ? (currentLang === "kn" ? "ಶಿಕ್ಷಕರ ಸಲ್ಲಿಕೆಯನ್ನು ಪರಿಶೀಲಿಸಿ SATS ಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ಮರುಪರಿಶೀಲನೆಗೆ ಹಿಂತಿರುಗಿಸಿ." : "Review teacher marks and batch-push to Karnataka SATS or request revision.")
+          : (currentLang === "kn" ? `ಈ ಸಲ್ಲಿಕೆಯ ಸ್ಥಿತಿ: ${activeReviewingSubmission.status.toUpperCase()}` : `Current submission status: ${activeReviewingSubmission.status.toUpperCase()}`);
+      }
+
+      wrap.innerHTML = `
+        ${isPending ? `
+          <button type="button" class="btn btn-success" onclick="approveSubmissionDirect('${activeReviewingSubmission.id}')" style="padding:10px 20px; font-weight:700;">
+            🚀 <span>ಅನುಮೋದಿಸಿ & SATS ಗೆ ಸಿಂಕ್ ಮಾಡಿ (Approve & Push to SATS)</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="openRejectSubmissionModal('${activeReviewingSubmission.id}')" style="color:#b91c1c;">
+            ❌ <span>ಮರುಪರಿಶೀಲನೆಗೆ ಕಳುಹಿಸಿ (Reject with Feedback)</span>
+          </button>
+        ` : ""}
+        <button type="button" class="btn btn-primary" onclick="exportSubmissionSatsCsv('${activeReviewingSubmission.id}')">
+          ⬇️ <span>ಅಧಿಕೃತ SATS CSV ಡೌನ್‌ಲೋಡ್ (Download Official SATS CSV)</span>
+        </button>
+      `;
+    } else {
+      // Direct HM Ingestion
+      if (hintEl) {
+        hintEl.textContent = currentLang === "kn"
+          ? "ನೇರವಾಗಿ SATS ಡೇಟಾಬೇಸ್‌ಗೆ ಬ್ಯಾಚ್ ಸೇವ್ ಮಾಡಿ ಅಥವಾ ಕರ್ನಾಟಕ SATS ಬಲ್ಕ್ ಅಪ್‌ಲೋಡ್ CSV ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ."
+          : "Direct batch save into SATS database or download official Karnataka bulk upload CSV.";
+      }
+
+      wrap.innerHTML = `
+        <button type="button" class="btn btn-success" onclick="handleBridgeCommit()" id="bridge-commit-btn" style="padding:10px 20px; font-weight:700;">
+          💾 <span data-i18n="bridge_save_sats">SATS ಗೆ ಬ್ಯಾಚ್ ಸೇವ್ ಮಾಡಿ (Direct Push)</span>
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="handleBridgeExportCsv()" id="bridge-export-btn">
+          ⬇️ <span data-i18n="bridge_download_csv">ಅಧಿಕೃತ SATS CSV ಡೌನ್‌ಲೋಡ್</span>
+        </button>
+      `;
+    }
+  }
+}
+
+function openSubmitBridgeModal() {
+  if (bridgeExtractedRecords.length === 0) {
+    toast(currentLang === "kn" ? "ಸಲ್ಲಿಸಲು ಯಾವುದೇ ಅಂಕಗಳ ದಾಖಲೆಗಳಿಲ್ಲ." : "No records to submit.", "warning");
+    return;
+  }
+
+  const summaryEl = document.getElementById("submit-bridge-summary");
+  if (summaryEl) {
+    const subj = document.getElementById("bridge-subject")?.value || "Mathematics";
+    const type = document.getElementById("bridge-type")?.value || "FA1";
+    summaryEl.textContent = `${subj} (${type}): ಒಟ್ಟು ${bridgeExtractedRecords.length} ವಿದ್ಯಾರ್ಥಿಗಳ ಅಂಕಗಳು`;
+  }
+
+  openModal("modal-submit-bridge");
+}
+
+async function handleConfirmSubmitToHm(e) {
+  e.preventDefault();
+  if (bridgeExtractedRecords.length === 0) return;
+
+  const btn = document.getElementById("confirm-submit-bridge-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = currentLang === "kn" ? "ಸಲ್ಲಿಸಲಾಗುತ್ತಿದೆ..." : "Submitting to HM...";
+  }
+
+  const subject = document.getElementById("bridge-subject")?.value || "Mathematics";
+  const assessmentType = document.getElementById("bridge-type")?.value || "FA1";
+  const targetClass = document.getElementById("submit-bridge-class")?.value || "8";
+  const section = document.getElementById("submit-bridge-sec")?.value || "A";
+  const notes = document.getElementById("submit-bridge-notes")?.value || "";
+  const maxMarks = parseFloat(document.getElementById("bridge-max-marks")?.value || "20");
+
+  try {
+    const res = await apiCall("POST", "/marks-bridge/submit", {
+      records: bridgeExtractedRecords,
+      subject,
+      assessment_type: assessmentType,
+      target_class: targetClass,
+      section,
+      max_marks: maxMarks,
+      submission_notes: notes,
+      source_filename: "Class " + targetClass + " " + subject + " Score Sheet"
+    });
+
+    if (res && res.ok) {
+      closeModal("modal-submit-bridge");
+      toast(
+        currentLang === "kn"
+          ? "🎉 ಯಶಸ್ವಿಯಾಗಿದೆ! ಅಂಕಪಟ್ಟಿಯನ್ನು ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ ಪರಿಶೀಲನೆಗೆ ಸಲ್ಲಿಸಲಾಗಿದೆ. HM ಅನುಮೋದಿಸಿದ ತಕ್ಷಣ SATS ಗೆ ಅಪ್‌ಲೋಡ್ ಆಗುತ್ತದೆ!"
+          : "🎉 Successfully submitted marks to Headmaster for review & SATS push!",
+        "success"
+      );
+      loadSubmissionsQueue();
+    } else {
+      toast(res?.data?.detail || "Submission failed", "error");
+    }
+  } catch (err) {
+    toast(`Submission error: ${err.message}`, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = currentLang === "kn" ? "📨 ಸಲ್ಲಿಕೆ ಖಚಿತಪಡಿಸಿ (Submit to HM)" : "📨 Confirm Submit to HM";
+    }
+  }
+}
+
+async function approveSubmissionDirect(submissionId) {
+  try {
+    const res = await apiCall("POST", `/marks-bridge/submissions/${submissionId}/approve`, {
+      review_notes: "Approved by Headmaster for official SATS synchronization."
+    });
+
+    if (res && res.ok) {
+      const data = res.data?.data || {};
+      toast(
+        currentLang === "kn"
+          ? `🎉 ಯಶಸ್ವಿಯಾಗಿದೆ! ${data.total || ''} ಅಂಕಗಳನ್ನು ಅಧಿಕೃತ SATS ಗೆ ಸೇವ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು ಸಿಂಕ್ ಕ್ಯೂಗೆ ಸೇರಿಸಲಾಗಿದೆ!`
+          : `🎉 Success! Approved and pushed ${data.total || ''} marks directly to SATS!`,
+        "success"
+      );
+      closeBridgeActiveContext();
+      loadSubmissionsQueue();
+      updateSyncBadge();
+      loadDashboardMetrics();
+    } else {
+      toast(res?.data?.detail || "Approval failed", "error");
+    }
+  } catch (err) {
+    toast(`Approval error: ${err.message}`, "error");
+  }
+}
+
+function openRejectSubmissionModal(submissionId) {
+  pendingRejectSubmissionId = submissionId;
+  openModal("modal-reject-bridge");
+}
+
+async function handleConfirmRejectSubmission(e) {
+  e.preventDefault();
+  if (!pendingRejectSubmissionId) return;
+
+  const notes = document.getElementById("reject-bridge-notes")?.value || "";
+  const btn = document.getElementById("confirm-reject-bridge-btn");
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await apiCall("POST", `/marks-bridge/submissions/${pendingRejectSubmissionId}/reject`, {
+      review_notes: notes
+    });
+
+    if (res && res.ok) {
+      closeModal("modal-reject-bridge");
+      toast(
+        currentLang === "kn"
+          ? "❌ ಅಂಕಪಟ್ಟಿಯನ್ನು ಮರುಪರಿಶೀಲನೆಗಾಗಿ ಶಿಕ್ಷಕರಿಗೆ ಹಿಂತಿರುಗಿಸಲಾಗಿದೆ."
+          : "❌ Submission rejected and sent back to teacher for revision.",
+        "info"
+      );
+      closeBridgeActiveContext();
+      loadSubmissionsQueue();
+    } else {
+      toast(res?.data?.detail || "Reject action failed", "error");
+    }
+  } catch (err) {
+    toast(`Error: ${err.message}`, "error");
+  } finally {
+    if (btn) btn.disabled = false;
+    pendingRejectSubmissionId = null;
+  }
+}
+
+async function exportSubmissionSatsCsv(submissionId) {
+  try {
+    const res = await fetch(`${API_BASE}/marks-bridge/submissions/${submissionId}/export-sats-csv`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${getStoredToken()}` }
+    });
+
+    if (!res.ok) throw new Error("Could not export SATS CSV");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sats_cce_upload_${submissionId.slice(0, 8)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+
+    toast(
+      currentLang === "kn"
+        ? "⬇️ ಅಧಿಕೃತ ಕರ್ನಾಟಕ SATS ಬಲ್ಕ್ CSV ಡೌನ್‌ಲೋಡ್ ಆಗಿದೆ!"
+        : "⬇️ Official Karnataka SATS bulk upload CSV downloaded successfully!",
+      "success"
+    );
+  } catch (err) {
+    toast(`Export error: ${err.message}`, "error");
   }
 }
 
@@ -1329,6 +1872,7 @@ async function handleBridgeParse(e) {
     );
 
     renderBridgeRecords(data);
+    renderBridgeActionButtons();
   } catch (err) {
     toast(`Bridge Error: ${err.message}`, "error");
   } finally {
@@ -1384,6 +1928,8 @@ function loadBridgeSampleDemo() {
     parser_used: "Sample Demo Mark Sheet",
     school_dise: currentTeacher?.school_dise_code || "29210101001"
   });
+
+  renderBridgeActionButtons();
 
   toast(
     currentLang === "kn"
@@ -1459,6 +2005,7 @@ function updateBridgeMarks(index, value) {
 function removeBridgeRow(index) {
   bridgeExtractedRecords.splice(index, 1);
   renderBridgeRecords();
+  renderBridgeActionButtons();
 }
 
 async function handleBridgeCommit() {

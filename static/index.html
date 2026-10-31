@@ -174,10 +174,19 @@
       border-radius: 20px;
       padding: 3px 12px 3px 6px;
       font-size: 12px;
+      transition: all 0.2s ease;
+    }
+    .user-chip.headmaster {
+      background: #fefce8;
+      border: 1.5px solid #facc15;
+    }
+    .user-chip.teacher {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
     }
     .user-avatar {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: var(--gov-navy);
       color: white;
@@ -186,6 +195,46 @@
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
+    }
+    .user-avatar.headmaster {
+      background: linear-gradient(135deg, #b45309, #d97706);
+      box-shadow: 0 0 0 2px #fef08a;
+    }
+    .user-avatar.teacher {
+      background: linear-gradient(135deg, #15803d, #16a34a);
+      box-shadow: 0 0 0 2px #bbf7d0;
+    }
+    .role-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.3px;
+      display: inline-block;
+    }
+    .role-badge.headmaster {
+      background: #fef08a;
+      color: #854d0e;
+    }
+    .role-badge.teacher {
+      background: #bbf7d0;
+      color: #166534;
+    }
+    .filter-tab {
+      padding: 5px 12px;
+      font-size: 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+    .filter-tab.active {
+      background: var(--gov-navy);
+      color: white;
+      border-color: var(--gov-navy);
     }
 
     /* Main App Layout */
@@ -715,10 +764,13 @@
       </div>
 
       <!-- User Chip -->
-      <div class="user-chip">
+      <div class="user-chip" id="user-chip-container">
         <div class="user-avatar" id="user-initials">HM</div>
         <div>
-          <strong id="user-name" style="color:var(--gov-navy);">Headmaster</strong>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <strong id="user-name" style="color:var(--gov-navy);">Headmaster</strong>
+            <span id="user-role-badge" class="role-badge headmaster">HM</span>
+          </div>
           <span style="font-size:10.5px; color:var(--text-muted); display:block;" id="user-designation">ಮುಖ್ಯೋಪಾಧ್ಯಾಯರು</span>
         </div>
       </div>
@@ -792,6 +844,22 @@
           <div>
             <button class="btn btn-primary" onclick="syncNow()">
               🔄 <span data-i18n="sync_now_btn">ಈಗಲೇ ಸಿಂಕ್ ಮಾಡಿ (Sync Now)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- HM Pending Submissions Alert Banner -->
+        <div id="dash-hm-notification-banner" style="display:none; background:#fef3c7; border:1.5px solid #f59e0b; border-radius:var(--radius); padding:14px 18px; margin-bottom:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:26px;">🔔</span>
+              <div>
+                <strong style="color:#92400e; font-size:14px;" id="dash-hm-alert-title">ಗಮನಿಸಿ: ಶಿಕ್ಷಕರಿಂದ ಅಂಕಪಟ್ಟಿಗಳು ಅನುಮೋದನೆಗೆ ಬಾಕಿ ಇವೆ</strong>
+                <div style="color:#78350f; font-size:12.5px; margin-top:2px;" id="dash-hm-alert-desc">ಶಿಕ್ಷಕರು ಸಲ್ಲಿಸಿರುವ ಅಂಕಪಟ್ಟಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಒಂದೇ ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಅಧಿಕೃತ SATS ಪೋರ್ಟಲ್‌ಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.</div>
+              </div>
+            </div>
+            <button class="btn btn-warning" onclick="showPage('bridge', event)" style="padding:8px 16px;">
+              <span id="dash-hm-alert-btn">👁️ ಪರಿಶೀಲಿಸಿ & SATS ಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ →</span>
             </button>
           </div>
         </div>
@@ -970,32 +1038,58 @@
         <div class="gov-page-banner">
           <div>
             <h1 data-i18n="bridge_title">🌉 SATS ಅಂಕಗಳ ಸೇತು (Marks Bridge)</h1>
-            <p data-i18n="bridge_subtitle">Excel, ಫೋಟೋ (Photo/Camera), ಅಥವಾ PDF ನಿಂದ ಅಂಕಗಳನ್ನು ಕ್ಷಣಾರ್ಧದಲ್ಲಿ ಕರ್ನಾಟಕ SATS/ನಿರಂತರ ಸ್ವರೂಪಕ್ಕೆ ಪರಿವರ್ತಿಸಿ!</p>
+            <p id="bridge-page-subtitle" data-i18n="bridge_subtitle">Excel, ಫೋಟೋ (Photo/Camera), ಅಥವಾ PDF ನಿಂದ ಅಂಕಗಳನ್ನು ಕ್ಷಣಾರ್ಧದಲ್ಲಿ ಕರ್ನಾಟಕ SATS/ನಿರಂತರ ಸ್ವರೂಪಕ್ಕೆ ಪರಿವರ್ತಿಸಿ!</p>
           </div>
           <div>
-            <span class="gov-badge badge-warning" style="font-size:12px; padding:6px 12px;">
+            <span id="bridge-role-badge" class="gov-badge badge-warning" style="font-size:12px; padding:6px 12px;">
               🛡️ SATS & ನಿರಂತರ ಸಹಾಯಕ ಸೇತು (Helping Bridge)
             </span>
           </div>
         </div>
 
-        <!-- Helping Motto Info Box -->
-        <div class="gov-card" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:16px 20px;">
+        <!-- Role-Adaptive Info Box -->
+        <div class="gov-card" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:16px 20px;" id="bridge-motto-box">
           <div style="display:flex; gap:12px; align-items:flex-start;">
-            <div style="font-size:24px;">💡</div>
+            <div style="font-size:24px;" id="bridge-motto-icon">💡</div>
             <div style="font-size:13px; line-height:1.6; color:#14532d;">
-              <strong style="font-size:14px;" data-i18n="bridge_motto_title">ಮುಖ್ಯೋಪಾಧ್ಯಾಯರಿಗೆ ಸಹಾಯಕ ಸೇತು (Bridge for Headmasters):</strong><br>
-              <span data-i18n="bridge_motto_desc">
+              <strong style="font-size:14px;" id="bridge-motto-title" data-i18n="bridge_motto_title">ಮುಖ್ಯೋಪಾಧ್ಯಾಯರಿಗೆ ಸಹಾಯಕ ಸೇತು (Bridge for Headmasters):</strong><br>
+              <span id="bridge-motto-desc" data-i18n="bridge_motto_desc">
                 ಶಿಕ್ಷಕರು ನೀಡುವ ಯಾವುದೇ ನಮೂನೆಯ ಎಕ್ಸೆಲ್ ಶೀಟ್, ಮಾರ್ಕ್ಸ್ ರಿಜಿಸ್ಟರ್ ಫೋಟೋ ಅಥವಾ ಪಿಡಿಎಫ್ ಅನ್ನು ನೇರವಾಗಿ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ. ನಮ್ಮ ಸಿಸ್ಟಂ ಅದನ್ನು ಕರ್ನಾಟಕ SATS CCE ಸ್ವರೂಪಕ್ಕೆ ಹೊಂದಿಸುತ್ತದೆ. ನೀವು ಒಬ್ಬೊಬ್ಬ ವಿದ್ಯಾರ್ಥಿಯ ಅಂಕಗಳನ್ನು ಗಂಟೆಗಟ್ಟಲೆ ವೆಬ್‌ಸೈಟ್‌ನಲ್ಲಿ ಟೈಪ್ ಮಾಡುವ ಅಗತ್ಯವಿಲ್ಲ!
               </span>
             </div>
           </div>
         </div>
 
-        <!-- Ingestion Form Card -->
-        <div class="gov-card">
+        <!-- HEADMASTER ONLY: Teacher Submissions Queue -->
+        <div class="gov-card" id="bridge-hm-submissions-card" style="display:none; border-top:3px solid #d97706;">
+          <div class="gov-card-header" style="flex-wrap:wrap; gap:12px;">
+            <div>
+              <h3 style="display:flex; align-items:center; gap:8px;">
+                <span>📥</span>
+                <span data-i18n="submissions_queue_title">ಶಿಕ್ಷಕರಿಂದ ಬಂದಿರುವ ಅಂಕಪಟ್ಟಿ ಸಲ್ಲಿಕೆಗಳು (Teacher Submissions Queue)</span>
+              </h3>
+              <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                ಶಿಕ್ಷಕರು ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಕಳುಹಿಸಿರುವ ಅಂಕಪಟ್ಟಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ, ಅನುಮೋದಿಸಿ SATS ಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.
+              </p>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" class="filter-tab active" id="sub-filter-all" onclick="filterSubmissionsQueue('all')">ಎಲ್ಲವೂ (All)</button>
+              <button type="button" class="filter-tab" id="sub-filter-pending" onclick="filterSubmissionsQueue('pending_approval')">🟡 ಬಾಕಿ (Pending)</button>
+              <button type="button" class="filter-tab" id="sub-filter-approved" onclick="filterSubmissionsQueue('approved')">🟢 ಅನುಮೋದಿತ</button>
+              <button type="button" class="filter-tab" id="sub-filter-rejected" onclick="filterSubmissionsQueue('rejected')">🔴 ತಿರಸ್ಕೃತ</button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="loadSubmissionsQueue()" title="Refresh Queue">🔄</button>
+            </div>
+          </div>
+
+          <div class="table-container" id="bridge-submissions-table-container">
+            <div class="empty-state"><div class="icon">⏳</div>ಸಲ್ಲಿಕೆಗಳ ವಿವರ ಲೋಡ್ ಆಗುತ್ತಿದೆ...</div>
+          </div>
+        </div>
+
+        <!-- Ingestion Form Card (Teachers & HM direct upload) -->
+        <div class="gov-card" id="bridge-ingest-card">
           <div class="gov-card-header">
-            <h3 data-i18n="bridge_upload_heading">📤 ಅಂಕಪಟ್ಟಿ ಅಪ್‌ಲೋಡ್ (Upload Score Sheet)</h3>
+            <h3 id="bridge-upload-heading" data-i18n="bridge_upload_heading">📤 ಅಂಕಪಟ್ಟಿ ಅಪ್‌ಲೋಡ್ (Upload Score Sheet)</h3>
             <span style="font-size:12px; color:var(--text-muted);">ಬೆಂಬಲಿತ ಮಾದರಿಗಳು: .xlsx, .xls, .csv, .pdf, .jpg, .png</span>
           </div>
 
@@ -1047,6 +1141,20 @@
         <!-- Extraction Results & Verification Grid -->
         <div id="bridge-results-container" style="display:none;">
           <div class="gov-card">
+            <!-- Active Submission Context Banner (if reviewing an HM queue item) -->
+            <div id="bridge-active-context-banner" style="display:none; background:#eff6ff; border:1px solid #bfdbfe; border-radius:4px; padding:12px 16px; margin-bottom:16px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:20px;">📋</span>
+                  <div>
+                    <strong style="color:#1e40af;" id="bridge-context-title">ಸಲ್ಲಿಕೆ ಪರಿಶೀಲನೆ</strong>
+                    <div style="font-size:12px; color:#3b82f6;" id="bridge-context-meta"></div>
+                  </div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeBridgeActiveContext()">✕ ಮುಚ್ಚಿ (Close Review)</button>
+              </div>
+            </div>
+
             <div class="gov-card-header">
               <h3 data-i18n="bridge_review_heading">📋 ಹೊರತೆಗೆದ ಅಂಕಗಳ ಪರಿಶೀಲನೆ (Review & Verify Before SATS Upload)</h3>
               <div id="bridge-summary-badges"></div>
@@ -1071,22 +1179,32 @@
               </table>
             </div>
 
-            <!-- Batch Actions Bar -->
+            <!-- Dynamic Batch Actions Bar -->
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; padding:14px; background:#f8fafc; border-radius:4px; border:1px solid var(--border-light);">
               <div>
-                <span style="font-size:12.5px; color:var(--text-muted);" data-i18n="bridge_action_hint">
+                <span style="font-size:12.5px; color:var(--text-muted);" id="bridge-action-hint-text" data-i18n="bridge_action_hint">
                   ಖಚಿತಪಡಿಸಿಕೊಂಡ ನಂತರ SATS ಗೆ ಬ್ಯಾಚ್ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ ಅಥವಾ ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.
                 </span>
               </div>
-              <div style="display:flex; gap:10px;">
-                <button type="button" class="btn btn-success" onclick="handleBridgeCommit()" id="bridge-commit-btn" style="padding:10px 20px;">
-                  💾 <span data-i18n="bridge_save_sats">SATS ಗೆ ಬ್ಯಾಚ್ ಸೇವ್ ಮಾಡಿ (Batch Save)</span>
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="handleBridgeExportCsv()" id="bridge-export-btn">
-                  ⬇️ <span data-i18n="bridge_download_csv">ಅಧಿಕೃತ SATS/ನಿರಂತರ CSV ಡೌನ್‌ಲೋಡ್</span>
-                </button>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;" id="bridge-action-buttons-wrap">
+                <!-- Buttons injected dynamically based on RBAC in renderBridgeActionButtons() -->
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- TEACHER ONLY: My Submissions History -->
+        <div class="gov-card" id="bridge-teacher-history-card" style="display:none; border-top:3px solid #16a34a; margin-top:24px;">
+          <div class="gov-card-header">
+            <h3 style="display:flex; align-items:center; gap:8px;">
+              <span>📋</span>
+              <span data-i18n="my_submissions_title">ನನ್ನ ಅಂಕಪಟ್ಟಿ ಸಲ್ಲಿಕೆಗಳು & SATS ಸ್ಥಿತಿ (My Submissions & Status)</span>
+            </h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="loadSubmissionsQueue()">🔄 Refresh</button>
+          </div>
+
+          <div class="table-container" id="bridge-teacher-history-container">
+            <div class="empty-state"><div class="icon">⏳</div>ಸಲ್ಲಿಕೆಗಳ ವಿವರ ಲೋಡ್ ಆಗುತ್ತಿದೆ...</div>
           </div>
         </div>
       </section>
@@ -1358,8 +1476,76 @@
   </div>
 </div>
 
+<!-- MODAL: Submit Marks to Headmaster -->
+<div class="modal-backdrop" id="modal-submit-bridge">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="color:#15803d; display:flex; align-items:center; gap:8px;">
+        <span>📨</span>
+        <span data-i18n="modal_submit_hm_title">ಮುಖ್ಯೋಪಾಧ್ಯಾಯರ ಅನುಮೋದನೆಗೆ ಸಲ್ಲಿಸಿ (Submit to Headmaster)</span>
+      </h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-submit-bridge')">✕</button>
+    </div>
+    <form id="submit-bridge-form" onsubmit="handleConfirmSubmitToHm(event)">
+      <div class="modal-body">
+        <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:4px; padding:12px; margin-bottom:14px;">
+          <div style="font-size:13px; font-weight:700; color:#166534;" id="submit-bridge-summary">ಅಂಕಪಟ್ಟಿ ಸಾರಾಂಶ: 0 ದಾಖಲೆಗಳು</div>
+          <div style="font-size:12px; color:#14532d; margin-top:3px;">
+            ಈ ಅಂಕಗಳನ್ನು ಮುಖ್ಯೋಪಾಧ್ಯಾಯರು ಪರಿಶೀಲಿಸಿ ಒಂದೇ ಕ್ಲಿಕ್‌ನಲ್ಲಿ ಅಧಿಕೃತ SATS ಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಲಿದ್ದಾರೆ.
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label">ತರಗತಿ ಮತ್ತು ವಿಭಾಗ (Class & Section)</label>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="submit-bridge-class" class="form-control" value="8" style="flex:1;" />
+            <input type="text" id="submit-bridge-sec" class="form-control" value="A" style="width:80px;" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ಮುಖ್ಯೋಪಾಧ್ಯಾಯರಿಗೆ ಟಿಪ್ಪಣಿ / Remarks for HM (ಐಚ್ಛಿಕ)</label>
+          <textarea id="submit-bridge-notes" class="form-control" rows="3" placeholder="ಉದಾ: ಭೌತಿಕ ರಿಜಿಸ್ಟರ್ ಫೋಟೋದಿಂದ ನಮೂದಿಸಲಾಗಿದೆ. ಪರೀಕ್ಷೆ ದಿನಾಂಕ: 28-ಅಕ್ಟೋಬರ್."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-submit-bridge')">ರದ್ದು (Cancel)</button>
+        <button type="submit" class="btn btn-success" id="confirm-submit-bridge-btn">📨 ಸಲ್ಲಿಕೆ ಖಚಿತಪಡಿಸಿ (Submit to HM)</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: Reject / Request Revision -->
+<div class="modal-backdrop" id="modal-reject-bridge">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 style="color:#b91c1c; display:flex; align-items:center; gap:8px;">
+        <span>❌</span>
+        <span>ಮರುಪರಿಶೀಲನೆಗೆ ಕಳುಹಿಸಿ (Request Revision)</span>
+      </h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-reject-bridge')">✕</button>
+    </div>
+    <form id="reject-bridge-form" onsubmit="handleConfirmRejectSubmission(event)">
+      <div class="modal-body">
+        <p style="font-size:13px; color:#475569; margin-bottom:12px;">
+          ಶಿಕ್ಷಕರಿಗೆ ಸರಿಪಡಿಸಲು ಸೂಚನೆಗಳನ್ನು ನಮೂದಿಸಿ. ಈ ಟಿಪ್ಪಣಿಯು ಶಿಕ್ಷಕರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿ ಕಾಣಿಸುತ್ತದೆ.
+        </p>
+        <div class="form-group">
+          <label class="form-label">ಮರುಪರಿಶೀಲನೆ ಕಾರಣ / Feedback for Teacher *</label>
+          <textarea id="reject-bridge-notes" class="form-control" rows="3" required placeholder="ಉದಾ: ರೋಲ್ ನಂ 4 ರ ಅಂಕಗಳು ನಮೂದಾಗಿಲ್ಲ. ದಯವಿಟ್ಟು ಪರಿಶೀಲಿಸಿ ಮರುಸಲ್ಲಿಸಿ."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-reject-bridge')">ರದ್ದು (Cancel)</button>
+        <button type="submit" class="btn btn-danger" id="confirm-reject-bridge-btn">❌ ತಿರಸ್ಕರಿಸಿ & ಹಿಂತಿರುಗಿಸಿ (Reject)</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div id="toast-container"></div>
 
-<script src="/static/app.js?v=2.1.0"></script>
+<script src="/static/app.js?v=2.2.0"></script>
 </body>
 </html>

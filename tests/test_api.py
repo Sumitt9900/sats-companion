@@ -91,6 +91,7 @@ class TestAuth:
         assert "access_token" in d["data"]
         assert d["data"]["token_type"] == "bearer"
         assert d["data"]["is_admin"] is True
+        assert d["data"]["role"] == "headmaster"
         assert d["data"]["designation"] == "headmaster"
 
     def test_login_success_teacher(self, client):
@@ -100,6 +101,7 @@ class TestAuth:
         assert r.status_code == 200
         d = r.json()
         assert d["data"]["is_admin"] is False
+        assert d["data"]["role"] == "teacher"
 
     def test_login_wrong_password(self, client):
         r = client.post("/api/v1/auth/login", data={
@@ -775,3 +777,136 @@ class TestMarksBridge:
     def test_marks_bridge_unauthenticated(self, client):
         r = client.post("/api/v1/marks-bridge/batch-commit", json={"records": []})
         assert r.status_code == 401
+
+    def test_teacher_submit_marks_workflow(self, client, teacher_token, hm_token):
+        """Test full teacher submission to HM approval and SATS push workflow."""
+        records = [
+            {
+                "student_sats_id": "SATS2901001",
+                "student_name": "Darshan Gowda",
+                "current_class": "8",
+                "subject": "Mathematics",
+                "assessment_type": "FA1",
+                "marks_obtained": 18.5,
+                "max_marks": 20.0
+            },
+            {
+                "student_sats_id": "SATS2901002",
+                "student_name": "Bhavya R",
+                "current_class": "8",
+                "subject": "Mathematics",
+                "assessment_type": "FA1",
+                "marks_obtained": 17.0,
+                "max_marks": 20.0
+            }
+        ]
+        # 1. Teacher submits marks batch for HM review
+        sub_resp = client.post(
+            "/api/v1/marks-bridge/submit",
+            headers={"Authorization": f"Bearer {teacher_token}"},
+            json={
+                "records": records,
+                "subject": "Mathematics",
+                "assessment_type": "FA1",
+                "target_class": "8",
+                "section": "A",
+                "max_marks": 20.0,
+                "academic_year": "2026-27",
+                "source_filename": "register_photo_scan.jpg",
+                "submission_notes": "Scanned from physical marks register"
+            }
+        )
+        assert sub_resp.status_code == 200
+        sub_data = sub_resp.json()
+        assert sub_data["status"] == "success"
+        sub_id = sub_data["data"]["submission_id"]
+        assert sub_data["data"]["status"] == "pending_approval"
+        assert sub_data["data"]["total_records"] == 2
+
+        # 2. Teacher can view their submission
+        teacher_list = client.get(
+            "/api/v1/marks-bridge/submissions",
+            headers={"Authorization": f"Bearer {teacher_token}"}
+        )
+        assert teacher_list.status_code == 200
+        assert any(s["id"] == sub_id for s in teacher_list.json()["data"]["submissions"])
+
+        # 3. RBAC Check: Teacher CANNOT approve their own submission (must be HM or Admin)
+        forbidden_approval = client.post(
+            f"/api/v1/marks-bridge/submissions/{sub_id}/approve",
+            headers={"Authorization": f"Bearer {teacher_token}"},
+            json={"review_notes": "Attempting teacher self-approval"}
+        )
+        assert forbidden_approval.status_code == 403, "Teacher should NOT be allowed to approve"
+
+        # 4. Headmaster views submissions queue
+        hm_list = client.get(
+            "/api/v1/marks-bridge/submissions",
+            headers={"Authorization": f"Bearer {hm_token}"}
+        )
+        assert hm_list.status_code == 200
+        assert hm_list.json()["data"]["is_headmaster"] is True
+        assert any(s["id"] == sub_id for s in hm_list.json()["data"]["submissions"])
+
+        # 5. Headmaster fetches submission details with records
+        detail = client.get(
+            f"/api/v1/marks-bridge/submissions/{sub_id}",
+            headers={"Authorization": f"Bearer {hm_token}"}
+        )
+        assert detail.status_code == 200
+        assert len(detail.json()["data"]["records"]) == 2
+
+        # 6. Headmaster exports official SATS CSV
+        csv_resp = client.get(
+            f"/api/v1/marks-bridge/submissions/{sub_id}/export-sats-csv",
+            headers={"Authorization": f"Bearer {hm_token}"}
+        )
+        assert csv_resp.status_code == 200
+        assert "text/csv" in csv_resp.headers["content-type"]
+        assert "SATS2901001" in csv_resp.text
+
+        # 7. Headmaster approves and pushes to SATS
+        approve_resp = client.post(
+            f"/api/v1/marks-bridge/submissions/{sub_id}/approve",
+            headers={"Authorization": f"Bearer {hm_token}"},
+            json={"review_notes": "Verified against class attendance. Approved for SATS push."}
+        )
+        assert approve_resp.status_code == 200
+        appr_data = approve_resp.json()
+        assert appr_data["status"] == "success"
+        assert appr_data["data"]["status"] == "approved"
+        assert appr_data["data"]["total"] >= 2
+
+    def test_headmaster_reject_submission_workflow(self, client, teacher_token, hm_token):
+        """Test rejection with feedback for teacher revision."""
+        records = [
+            {
+                "student_sats_id": "SATS2901001",
+                "student_name": "Darshan Gowda",
+                "current_class": "8",
+                "subject": "Science",
+                "assessment_type": "FA2",
+                "marks_obtained": 15.0,
+                "max_marks": 20.0
+            }
+        ]
+        sub_resp = client.post(
+            "/api/v1/marks-bridge/submit",
+            headers={"Authorization": f"Bearer {teacher_token}"},
+            json={
+                "records": records,
+                "subject": "Science",
+                "assessment_type": "FA2",
+                "source_filename": "science_test.xlsx"
+            }
+        )
+        sub_id = sub_resp.json()["data"]["submission_id"]
+
+        reject_resp = client.post(
+            f"/api/v1/marks-bridge/submissions/{sub_id}/reject",
+            headers={"Authorization": f"Bearer {hm_token}"},
+            json={"review_notes": "Roll no 5 marks missing. Please verify and re-submit."}
+        )
+        assert reject_resp.status_code == 200
+        assert reject_resp.json()["data"]["status"] == "rejected"
+

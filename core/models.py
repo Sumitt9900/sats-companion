@@ -111,6 +111,12 @@ class SyncStatus(str, enum.Enum):
     SKIPPED = "skipped"
 
 
+class SubmissionStatus(str, enum.Enum):
+    PENDING_APPROVAL = "pending_approval"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
 # ---------------------------------------------------------------------------
 # School
 # ---------------------------------------------------------------------------
@@ -369,3 +375,41 @@ class SyncLog(Base):
     started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     completed_at = Column(DateTime, nullable=True)
     success = Column(Boolean, default=False, nullable=False)
+
+
+# ---------------------------------------------------------------------------
+# MarksBatchSubmission — Teacher ingested marks awaiting HM approval & SATS sync
+# ---------------------------------------------------------------------------
+class MarksBatchSubmission(Base):
+    """
+    Submissions of marks ingested by teachers (via Excel, CSV, PDF, or Photo OCR)
+    awaiting review, verification, and SATS upload by the Headmaster.
+    """
+    __tablename__ = "marks_batch_submissions"
+
+    id = Column(String(36), primary_key=True, default=_uuid)
+    school_dise_code = Column(String(20), ForeignKey("schools.dise_code"), nullable=False, index=True)
+    submitted_by_teacher_id = Column(String(36), ForeignKey("teachers.id"), nullable=False, index=True)
+    reviewed_by_teacher_id = Column(String(36), ForeignKey("teachers.id"), nullable=True)
+
+    academic_year = Column(String(10), nullable=False, default="2026-27")
+    target_class = Column(String(10), nullable=True)
+    section = Column(String(5), nullable=True)
+    subject = Column(String(100), nullable=False)
+    assessment_type = Column(String(50), nullable=False)
+    max_marks = Column(Float, nullable=False, default=20.0)
+    total_records = Column(Integer, nullable=False, default=0)
+    source_filename = Column(String(255), nullable=True)
+    records_json = Column(Text, nullable=False)  # JSON-encoded array of candidate mark records
+    status = Column(Enum(SubmissionStatus), nullable=False, default=SubmissionStatus.PENDING_APPROVAL, index=True)
+    submission_notes = Column(Text, nullable=True)
+    hm_review_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    reviewed_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    school = relationship("School")
+    submitted_by = relationship("Teacher", foreign_keys=[submitted_by_teacher_id])
+    reviewed_by = relationship("Teacher", foreign_keys=[reviewed_by_teacher_id])
+
